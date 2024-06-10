@@ -1,5 +1,5 @@
 from network import sio,auth_data
-from event_handler import EventHandler
+from helper.event_handler import EventHandler
 
 @sio.event
 def disconnect():

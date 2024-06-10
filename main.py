@@ -6,7 +6,11 @@ import network.socket.listen.mission
 from network import url, auth_data
 
 from datetime import datetime
-from security import generate_secret_key
+from helper.security import generate_secret_key
+
+from camera.cam import Camera
+from camera.focus import Focuser
+from image_processing.processor import LineFollower
 
 class Main:
     def __init__(self):
@@ -17,7 +21,6 @@ class Main:
 
     def update(self):
         pass 
-
 
 if __name__ == "__main__":
     token = login()

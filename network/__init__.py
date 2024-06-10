@@ -1,5 +1,5 @@
 import socketio
-from json_helper import read_json
+from helper.json_helper import read_json
 
 url = "http://192.168.1.106:5000"
 
