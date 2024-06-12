@@ -9,4 +9,3 @@ from .road_map import RoadMap
 from .robot import Robot
 from .robot_information import RobotInformation
 from .settings import Settings
-from .turn_point import TurnPoint

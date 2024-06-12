@@ -19,5 +19,9 @@ class Mission(Base):
     robot = relationship("Robot", back_populates="mission")
     location = relationship("Location", back_populates="mission")
     road_map = relationship("RoadMap", back_populates="mission")
-    turn_point = relationship("TurnPoint", back_populates="mission")
     robot_information = relationship("RobotInformation", back_populates="mission")
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(**data)
+

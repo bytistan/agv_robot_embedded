@@ -8,7 +8,7 @@ class RoadMap(Base):
     
     id = Column(Integer, primary_key=True)
     mission_id = Column(Integer, ForeignKey("mission.id"))
-    target_area = Column(String, nullable=False)
+    qr_code_id = Column(Integer, ForeignKey("qr_code.id")))
     reached = Column(Boolean, default=False)
     index = Column(Integer,nullable=True)
 
@@ -18,3 +18,9 @@ class RoadMap(Base):
     created_date = Column(DateTime, default=datetime.utcnow)
 
     mission = relationship("Mission", back_populates="road_map")
+    qr_code = relationship("QRCode", back_populates="road_map")
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(**data)
+

@@ -17,4 +17,3 @@ class Settings(Base):
     updated_date = Column(DateTime, default=datetime.utcnow)
 
     robot = relationship("Robot", back_populates="settings")
-
