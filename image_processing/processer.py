@@ -32,7 +32,7 @@ class LineFollower:
         dilated_image = cv2.dilate(eroded_image, self.kernel, iterations=1) 
         return binary_image # Return the processed image
 
-    def create_perCentange_data(self,parts):
+    def create_percentange_data(self,parts):
         data = []
         for index,part in enumerate(parts):
             black_ratio,white_ratio = self.calculate_black_white_ratio(part)
@@ -42,7 +42,7 @@ class LineFollower:
     def decision(self,data):
         black_parts = []
         for index,per in enumerate(data):
-            if per[0] > 25:
+            if per[0] > 25: # in one square black percentage
                black_parts.append(index)
         for key in line_changer:
             if line_changer[key] == black_parts:          
@@ -52,6 +52,6 @@ class LineFollower:
     def process(self,image):
         binary_image = self.make_image_black_white(image)
         parts = self.div_image(binary_image)
-        data = self.create_perCentange_data(parts)
+        data = self.create_percentange_data(parts)
         order = self.decision(data)
         return data

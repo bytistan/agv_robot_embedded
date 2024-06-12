@@ -54,3 +54,7 @@ class Vehicle:
         self.motor_sw.cleanup()
         self.motor_se.cleanup()
         self.motor_ne.cleanup()
+
+    def update(self,order,speed):
+        if order == 0:
+            pass            
