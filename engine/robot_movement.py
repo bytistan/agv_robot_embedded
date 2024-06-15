@@ -1,6 +1,6 @@
 import Jetson.GPIO as GPIO
 
-class Vehicle:
+class RobotMovement:
     def __init__(self):
         self.motor_nw = MotorController(in1_pin=24, in2_pin=23, en_pin=12)
         self.motor_sw = MotorController(in1_pin=11, in2_pin=25, en_pin=13)
