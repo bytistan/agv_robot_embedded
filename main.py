@@ -13,6 +13,8 @@ from models import *
 from database import engine 
 from sqlalchemy.orm import sessionmaker
 
+from robot import Robot
+
 if __name__ == "__main__":
     """
         Create database and insert some information.

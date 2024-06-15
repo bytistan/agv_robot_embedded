@@ -8,7 +8,7 @@ class RoadMap(Base):
     
     id = Column(Integer, primary_key=True)
     mission_id = Column(Integer, ForeignKey("mission.id"))
-    qr_code_id = Column(Integer, ForeignKey("qr_code.id")))
+    qr_code_id = Column(Integer, ForeignKey("qr_code.id"))
     reached = Column(Boolean, default=False)
     index = Column(Integer,nullable=True)
 

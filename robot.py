@@ -1,7 +1,7 @@
 from camera.cam import Camera
 from camera.focus import Focuser
 from image_processing.processer import LineFollower
-from pyzbar.pyzbar import decoder
+from pyzbar.pyzbar import decode
 from image_processing.helper import calculate_center, is_centered
 # from engine.robot_movement import RobotMovement
 
@@ -132,15 +132,16 @@ class Robot:
                value *= -1 
                 
             if location:
-                """
-                    If location is verticall add the wheel perimeter to verticall coordinate.
-                """
+                
                 if location.direction in [0,1]:
+                    """
+                        If location is verticall add the wheel perimeter to verticall coordinate.
+                    """
                     location.vertical_coordinate = location.vertical_coordinate + value 
-                """
-                    If location is horizontall add the wheel perimeter to horizontall coordinate.
-                """
                 elif location.direction in [2,3]:
+                    """
+                        If location is horizontall add the wheel perimeter to horizontall coordinate.
+                    """
                     location.horizontall_coordinate = location.horizontall_coordinate + value 
             
                 session.commit()
@@ -280,7 +281,7 @@ class Robot:
         while True:
             frame = self.camera.get_frame()
             line_status = self.line_follower.process(frame)            
-            scan_result = decoder(frame)
+            scan_result = decode(frame)
 
             if scan_result: 
                 """
@@ -301,12 +302,13 @@ class Robot:
                     if destination:
                         self.destination = destination
                         self.logger.info("Destination updated.")
-                    """
-                        If not find new destination this means the mission is over.
-                    """
                     else:
+                        """
+                            If not find new destination this means the mission is over.
+                        """
                         self.close_mission()
                         self.logger.info("Destination record not found.")
+
             if self.robot.mode == 5:
                 pass 
             else:
@@ -326,11 +328,11 @@ class Robot:
                         if line_status in [3,4]:
                             self.robot_movement.update(line_status)  
                             self.logger.info("Robot turn from corner.")
-                        """
-                            if the line condition is t-shaped, we check if it is aligned 
-                            with the destination.
-                        """
                         elif line_status in [1,2]:
+                            """
+                                If the line condition is t-shaped, we check if it is aligned 
+                                with the destination.
+                            """
                             self.path_finder(line_status)
 
                     elif self.robot.mode == 1:
