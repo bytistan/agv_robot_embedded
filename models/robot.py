@@ -17,3 +17,4 @@ class Robot(Base):
     mission = relationship("Mission", back_populates="robot")
     qr_code = relationship("QRCode", back_populates="robot")
     settings = relationship("Settings", back_populates="robot")
+    connection = relationship("Connection", back_populates="robot")

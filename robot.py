@@ -5,8 +5,11 @@ from pyzbar.pyzbar import decode
 from image_processing.helper import calculate_center, is_centered
 # from engine.robot_movement import RobotMovement
 
+from database import engine 
+from sqlalchemy.orm import sessionmaker
+
 class Robot:
-    def __init__(self,logger):
+    def __init__(self,logger,sio):
         """
             Camera Object Explanation : This object is used to control the camera. It allows to 
             obtain data from the camera in opencv format.
@@ -27,46 +30,40 @@ class Robot:
             Forward, reverse, stop etc. operations are realized.
         """
         self.robot_movement = RobotMovement()
-        """
-            Returns information about the robot.
-        """
+
+        # For server connection  
+        self.sio = sio
+
+        # Returns information about the robot.
         self.logger = logger 
-        """
-            Information about the robot is stored in the data variable when the program runs.
-        """
+
+        # Information about the robot is stored in the data variable when the program runs.
         self.robot = self.init()
-        """ 
-            Using for odoymetry.
-        """
+
+        # Using for odoymetry.
         self.wheel_perimeter = 0
-        """
-            Line tolerance.
-        """
+
+        # Line tolerance when robot turn.
         self.tolerance = 20
-        """
-            Mission information.
-        """
+
+        # Mission information coming from when robot run function call.
         self.mission = None
-        """
-            Destionation information.
-        """
+
+        # Destionation information.
         self.destination = None
-        """
-            Protocols for compicated mission.
-        """
+
+        # Protocols for compicated mission.
         self.protocol = []
-        """
-            Robot location.
-        """
+
+        # Robot location.
         self.location = self.find_location() 
 
     def find_location(self):
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
-            """
-                Just have one location record in database and need the find.
-            """
+
+            # Just have one location record in database and need the find.
             location = session.query(Location).filter(Location.id > 0).first()
 
             if location:
@@ -87,9 +84,8 @@ class Robot:
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
-            """
-                Just have one robot record in database and need the find.
-            """
+
+            # Just have one robot record in database and need the find.
             robot = session.query(Robot).filter(Robot.id > 0).first()
 
             if robot:
@@ -121,27 +117,21 @@ class Robot:
             session = Session()
 
             value = self.wheel_perimeter
-            """
-                We update the location we have one.
-            """
+
+            # We update the location we have one.
             location = session.query(Location).filter(Location.id > 0).first()
-            """
-                If robot going negative direction make value negative.
-            """
+
+            # If robot going negative direction make value negative.
             if location.direction in [0,2]: 
                value *= -1 
                 
             if location:
                 
                 if location.direction in [0,1]:
-                    """
-                        If location is verticall add the wheel perimeter to verticall coordinate.
-                    """
+                    # If location is verticall add the wheel perimeter to verticall coordinate.
                     location.vertical_coordinate = location.vertical_coordinate + value 
                 elif location.direction in [2,3]:
-                    """
-                        If location is horizontall add the wheel perimeter to horizontall coordinate.
-                    """
+                    # If location is horizontall add the wheel perimeter to horizontall coordinate.
                     location.horizontall_coordinate = location.horizontall_coordinate + value 
             
                 session.commit()
@@ -176,21 +166,17 @@ class Robot:
             session = Session()
 
             location = session.query(Location).filter(Location.id > 0).first()
-            """
-                If robot location in same horizontall line with the target.
-            """
+
+            # If robot location in same horizontall line with the target.
             if self.destination.qr_code.horizontall_coordinate - self.tolerance < location.horizontall_coordinate < self.destination.qr_code.horizontall_coordinate + self.tolerance: 
-                """
-                    We turn that point and update direction.
-                """
+
+                # We turn that point and update direction.
                 self.robot_movement.update(order)
-                """
-                    Find direction data looking up to line status.
-                """
+
+                # Find direction data looking up to line status.
                 direction = direction_data.get(order)
-                """
-                    It's not so important for safety.
-                """
+
+                # It's not so important for safety.
                 if direction:
                     location.direction = direction 
                     self.logger.info("Direction is updated")
@@ -250,13 +236,22 @@ class Robot:
                 session.close()
 
     def center_line(self):
+        """
+            Function Explanation : 
+        """
         pass
 
     def qr_code_center(self):
-        pass 
+        """
+            Function Explanation : 
+        """
+        pass
 
     def connection_handler(self):
-        pass 
+        """
+            Function Explanation : 
+        """
+        pass
 
     def run(self,mission):
         self.mission = mission
@@ -284,28 +279,18 @@ class Robot:
             scan_result = decode(frame)
 
             if scan_result: 
-                """
-                    If scan result same with the destination area.
-                """
+                # If scan result same with the destination area.
                 if scan_result[0].data.encode("utf-8") == self.destination.qr_code.area_name:
-                    """
-                        Update the destination column reached.
-                    """
+                    # Update the destination column reached.
                     self.reached_destination()
-                    """
-                        Find new destination.
-                    """
+                    # Find new destination.
                     destination = self.destination_finder()
-                    """
-                        If find the new destination it is good.
-                    """
+                    # If find the new destination it is good.
                     if destination:
                         self.destination = destination
                         self.logger.info("Destination updated.")
                     else:
-                        """
-                            If not find new destination this means the mission is over.
-                        """
+                        # If not find new destination this means the mission is over.
                         self.close_mission()
                         self.logger.info("Destination record not found.")
 
@@ -313,26 +298,18 @@ class Robot:
                 pass 
             else:
                 if line_status in [5,6]:
-                    """
-                        All motors stop and robot goes right or left.
-                    """
+                    # All motors stop and robot goes right or left.
                     self.robot_movement.update(line_status) 
                 else:
-                    """
-                        If robot searching mode.
-                    """
+                    # If robot searching mode.
                     if self.robot.mode == 0:
-                        """
-                            If line status corner robot have to turn we not do anything here.
-                        """
                         if line_status in [3,4]:
+                            # If line status corner robot have to turn we not do anything here.
                             self.robot_movement.update(line_status)  
                             self.logger.info("Robot turn from corner.")
                         elif line_status in [1,2]:
-                            """
-                                If the line condition is t-shaped, we check if it is aligned 
-                                with the destination.
-                            """
+                            # If the line condition is t-shaped, we check if it is aligned 
+                            # with the destination.
                             self.path_finder(line_status)
 
                     elif self.robot.mode == 1:
