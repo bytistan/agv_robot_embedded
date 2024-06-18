@@ -263,7 +263,6 @@ class Robot:
                 - 2 : Unload mode.
                 - 3 : Passing around obstacles mode.
                 - 4 : Go to charge station mode.
-                - 5 : Wait mode.
 
             Line Status Explanation :
 
@@ -294,32 +293,29 @@ class Robot:
                         self.close_mission()
                         self.logger.info("Destination record not found.")
 
-            if self.robot.mode == 5:
-                pass 
+            if line_status in [5,6]:
+                # All motors stop and robot goes right or left.
+                self.robot_movement.update(line_status) 
             else:
-                if line_status in [5,6]:
-                    # All motors stop and robot goes right or left.
-                    self.robot_movement.update(line_status) 
-                else:
-                    # If robot searching mode.
-                    if self.robot.mode == 0:
-                        if line_status in [3,4]:
-                            # If line status corner robot have to turn we not do anything here.
-                            self.robot_movement.update(line_status)  
-                            self.logger.info("Robot turn from corner.")
-                        elif line_status in [1,2]:
-                            # If the line condition is t-shaped, we check if it is aligned 
-                            # with the destination.
-                            self.path_finder(line_status)
+                # If robot searching mode.
+                if self.robot.mode == 0:
+                    if line_status in [3,4]:
+                        # If line status corner robot have to turn we not do anything here.
+                        self.robot_movement.update(line_status)  
+                        self.logger.info("Robot turn from corner.")
+                    elif line_status in [1,2]:
+                        # If the line condition is t-shaped, we check if it is aligned 
+                        # with the destination.
+                        self.path_finder(line_status)
 
-                    elif self.robot.mode == 1:
-                        pass
-                    
-                    elif self.robot.mode == 2:
-                        pass
+                elif self.robot.mode == 1:
+                    pass
+                
+                elif self.robot.mode == 2:
+                    pass
 
-                    elif self.robot.mode == 3:
-                        pass
+                elif self.robot.mode == 3:
+                    pass
 
-                    elif self.robot.mode == 4:
-                        pass 
+                elif self.robot.mode == 4:
+                    pass 
