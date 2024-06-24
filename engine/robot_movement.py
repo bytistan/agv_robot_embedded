@@ -7,25 +7,25 @@ class RobotMovement:
         self.motor_se = MotorController(in1_pin=17, in2_pin=27, en_pin=18)
         self.motor_ne = MotorController(in1_pin=22, in2_pin=5, en_pin=19)
 
-    def forward(self, speed):
+    def go_forward(self, speed):
         self.motor_nw.forward(speed)
         self.motor_sw.forward(speed)
         self.motor_se.forward(speed)
         self.motor_ne.forward(speed)
 
-    def backward(self, speed):
+    def go_backward(self, speed):
         self.motor_nw.backward(speed)
         self.motor_sw.backward(speed)
         self.motor_se.backward(speed)
         self.motor_ne.backward(speed)
 
-    def right(self, speed):
+    def go_right(self, speed):
         self.motor_nw.backward(speed)
         self.motor_ne.forward(speed)
         self.motor_sw.forward(speed)
         self.motor_se.backward(speed)
 
-    def left(self, speed):
+    def go_left(self, speed):
         self.motor_nw.forward(speed)
         self.motor_ne.backward(speed)
         self.motor_sw.backward(speed)
@@ -54,7 +54,3 @@ class RobotMovement:
         self.motor_sw.cleanup()
         self.motor_se.cleanup()
         self.motor_ne.cleanup()
-
-    def update(self,order,speed):
-        if order == 0:
-            pass            

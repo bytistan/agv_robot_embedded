@@ -1,5 +1,4 @@
 SQLAlchemy==2.0.30
-opencv-python==4.10.0.82
 python-socketio==5.11.2
 requests==2.32.3
 pyzbar==0.1.9

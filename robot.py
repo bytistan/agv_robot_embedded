@@ -49,7 +49,7 @@ class Robot:
         # Mission information coming from when robot run function call.
         self.mission = None
 
-        # Destionation information.
+        # destination information.
         self.destination = None
 
         # Protocols for compicated mission.
@@ -107,10 +107,10 @@ class Robot:
             NOTE: For negative directions, the wheel's age is multiplied by -1.
 
             Direction Explanation :
-                - 0 : Horizontall axis negive.
-                - 1 : Horizontall axis positive.
-                - 2 : Verticall axis negative.
-                - 3 : Verticall axis positive.
+                - 0 : horizontal axis negive.
+                - 1 : horizontal axis positive.
+                - 2 : vertical axis negative.
+                - 3 : vertical axis positive.
         """
         try:
             Session = sessionmaker(bind=engine)
@@ -118,21 +118,17 @@ class Robot:
 
             value = self.wheel_perimeter
 
-            # We update the location we have one.
-            location = session.query(Location).filter(Location.id > 0).first()
-
             # If robot going negative direction make value negative.
-            if location.direction in [0,2]: 
+            if self.location.direction in [0,2]: 
                value *= -1 
                 
-            if location:
-                
-                if location.direction in [0,1]:
-                    # If location is verticall add the wheel perimeter to verticall coordinate.
-                    location.vertical_coordinate = location.vertical_coordinate + value 
+            if self.location:
+                if self.location.direction in [0,1]:
+                    # If location is vertical add the wheel perimeter to vertical coordinate.
+                    self.location.vertical_coordinate = self.location.vertical_coordinate + value 
                 elif location.direction in [2,3]:
-                    # If location is horizontall add the wheel perimeter to horizontall coordinate.
-                    location.horizontall_coordinate = location.horizontall_coordinate + value 
+                    # If location is horizontal add the wheel perimeter to horizontal coordinate.
+                    self.location.horizontal_coordinate = self.location.horizontal_coordinate + value 
             
                 session.commit()
         except Exception as e:
@@ -156,35 +152,58 @@ class Robot:
         except Exception as e:
             self.logger.error(f"Error occured: {e}") 
 
-    def path_finder(self,order):
+    def turn(self):
+        """
+            Function Explanation : 
+        """
+        pass
+
+    def path_finder(self,line_status):
         """
             Function Explanation : It decides from which point the robot should turn to reach 
             the target.
+
+            Direction Explanation :
+                - 0 : Horizontal axis negive.
+                - 1 : Horizontal axis positive.
+                - 2 : Vertical axis negative.
+                - 3 : Vertical axis positive.
+
+            Line Status Explanation :
+
+                - 0 : Center the line.
+                - 1 : Turn down.
+                - 2 : Turn up.
+                - 3 : Turn left.
+                - 4 : Turn rigth.
         """
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
 
-            location = session.query(Location).filter(Location.id > 0).first()
-
-            # If robot location in same horizontall line with the target.
-            if self.destination.qr_code.horizontall_coordinate - self.tolerance < location.horizontall_coordinate < self.destination.qr_code.horizontall_coordinate + self.tolerance: 
-
-                # We turn that point and update direction.
-                self.robot_movement.update(order)
-
-                # Find direction data looking up to line status.
-                direction = direction_data.get(order)
-
-                # It's not so important for safety.
-                if direction:
-                    location.direction = direction 
-                    self.logger.info("Direction is updated")
-                    session.commit()
-                else:
-                    self.logger.warning("Direction record is not found.")
+            if self.location.direction in [0,1]:
+                if (self.location.direction == 0 and self.location.horizontal_coordinate > self.destination.horizontal_coordinate) or (self.location.direction == 1 and self.location.horizontal_coordinate < self.destination.horizontal_coordinate):
+                    pass # Make U-turn here 
+            elif self.location.direction in [2,3]:
+                if (self.location.direction == 2 and self.location.vertical_coordinate > self.destination.vertical_coordinate) or (self.location.direction == 3 and self.location.vertical_coordinate < self.destination.vertical_coordinate):
+                    pass # Make U-turn here 
             else:
-                self.logger.info("The destionation is not on this turn.")
+                self.logger.warning("Location direction is broken.")
+
+            if line_status in [1,2,3,4]:
+                if self.location.direction in [0,1] and (self.destination.horizontal_coordinate + self.tolerance > self.location.horizontal_coordinate > self.destination.horizontal_coordinate - self.tolerance):
+                    pass # Make turn here 
+                if self.location.direction in [2,3] and (self.destination.vertical_coordinate + self.tolerance > self.location.vertical_coordinate > self.destination.vertical_coordinate - self.tolerance):
+                    pass # Make turn here
+
+            # It's not so important for safety.
+            if direction:
+                location.direction = direction 
+                self.logger.info("Direction is updated")
+                session.commit()
+            else:
+                self.logger.warning("Direction record is not updated.")
+
         except Exception as e:
             self.logger.error(f"Error occured: {e}") 
         finally:
@@ -199,17 +218,34 @@ class Robot:
             if code in value:
                 return key 
 
-    def reached_destination(self):
+    def check_scan_result(self,scan_result):
         """
-            Function Explanation : Basicly update the road map reached value.
+            Function Explanation :
         """
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
-            self.destination.reached = True
-            session.commit()
+ 
+            area_name = scan_result[0].data.encode("utf-8") 
 
-            self.logger.info("Robot reached the destination") 
+            # If scan result same with the destination area.
+            if area_name == self.destination.qr_code.area_name:
+                self.logger.info(f"Robot reached the {area_name} destination") 
+                # Update the destination column reached.
+                self.destination.reached = True
+                session.commit()
+                # Find new destination.
+                destination = self.destination_finder()
+                # If find the new destination it is good.
+                if destination:
+                    self.destination = destination
+                    self.logger.info("Destination updated.")
+                else:
+                    # If not find new destination this means the mission is over.
+                    self.close_mission()
+                    self.logger.info("Destination record not found.")
+            else:
+                self.logger.info(f"{area_name} is not the destination area.")
         except Exception as e:
             self.logger.error(f"Error occured: {e}") 
         finally:
@@ -263,6 +299,8 @@ class Robot:
                 - 2 : Unload mode.
                 - 3 : Passing around obstacles mode.
                 - 4 : Go to charge station mode.
+                - 5 : U-turn mode.
+                - 6 : Line center mode.
 
             Line Status Explanation :
 
@@ -278,44 +316,6 @@ class Robot:
             scan_result = decode(frame)
 
             if scan_result: 
-                # If scan result same with the destination area.
-                if scan_result[0].data.encode("utf-8") == self.destination.qr_code.area_name:
-                    # Update the destination column reached.
-                    self.reached_destination()
-                    # Find new destination.
-                    destination = self.destination_finder()
-                    # If find the new destination it is good.
-                    if destination:
-                        self.destination = destination
-                        self.logger.info("Destination updated.")
-                    else:
-                        # If not find new destination this means the mission is over.
-                        self.close_mission()
-                        self.logger.info("Destination record not found.")
-
-            if line_status in [5,6]:
-                # All motors stop and robot goes right or left.
-                self.robot_movement.update(line_status) 
-            else:
-                # If robot searching mode.
-                if self.robot.mode == 0:
-                    if line_status in [3,4]:
-                        # If line status corner robot have to turn we not do anything here.
-                        self.robot_movement.update(line_status)  
-                        self.logger.info("Robot turn from corner.")
-                    elif line_status in [1,2]:
-                        # If the line condition is t-shaped, we check if it is aligned 
-                        # with the destination.
-                        self.path_finder(line_status)
-
-                elif self.robot.mode == 1:
-                    pass
-                
-                elif self.robot.mode == 2:
-                    pass
-
-                elif self.robot.mode == 3:
-                    pass
-
-                elif self.robot.mode == 4:
-                    pass 
+                self.check_scan_result(scan_result)
+            if self.robot.mode == 0:
+                self.path_finder(line_status)
