@@ -6,7 +6,7 @@ from models import *
 from database import engine 
 from sqlalchemy.orm import sessionmaker
 
-from robot import Robot
+from robot.robot import Robot
 
 from network.api.login import login
 from network import url, auth_data
