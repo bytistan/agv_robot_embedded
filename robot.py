@@ -1,5 +1,4 @@
 from camera.cam import Camera
-from camera.focus import Focuser
 from image_processing.processer import LineFollower
 from pyzbar.pyzbar import decode
 from image_processing.helper import calculate_center, is_centered
@@ -15,10 +14,6 @@ class Robot:
             obtain data from the camera in opencv format.
         """
         self.camera = Camera()
-        """
-            Focuser Object Explanation : With this object the focus of the camera is adjusted.
-        """
-        self.focuser = Focuser()
         """
             Line Follower Object Explanation : Convert the resulting opencv format image to black 
             and white. After dividing it into 9 equal parts, it gives information about the state 

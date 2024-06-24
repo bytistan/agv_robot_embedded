@@ -9,13 +9,15 @@ from sqlalchemy.orm import sessionmaker
 from robot import Robot
 
 from network.api.login import login
-from network import url, auth_data import socketio
+from network import url, auth_data
 from logger import logger
 from system_startup import SystemStartup
 
+import socketio
+
 system_startup = SystemStartup()
 sio = socketio.Client()
-robot = Robot(sio)
+# robot = Robot(logger,sio)
 
 @sio.event
 def connect():

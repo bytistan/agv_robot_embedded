@@ -2,6 +2,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+from .connection import Connection
 from .location import Location
 from .mission import Mission
 from .qr_code import QRCode
