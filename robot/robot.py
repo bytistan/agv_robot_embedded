@@ -65,13 +65,10 @@ class Robot:
                     # If location is horizontal add the wheel perimeter to horizontal coordinate.
                     self.location.horizontal_coordinate = self.location.horizontal_coordinate + value 
                 session.commit()
+                session.close()
 
         except Exception as e:
             self.logger.error(f"Error occured: {e}") 
-
-        finally:
-            if session is not None:
-                session.close()
 
     def turn(self):
         pass
@@ -82,4 +79,3 @@ class Robot:
         while True:
             frame = self.camera.get_frame()
             line_status = self.line_follower.process(frame)            
-

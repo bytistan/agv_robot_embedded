@@ -34,6 +34,7 @@ def login():
                     connection.token = token
                     connection.updated_date = datetime.utcnow()
                 session.commit()
+                session.close()
 
                 # Return the token but this one is not important because we will use in database.
                 return token
@@ -44,6 +45,3 @@ def login():
 
     except Exception as e:
         logger.error(f"Error occured : {e}")
-    finally:
-        if session is not None:
-            session.close()

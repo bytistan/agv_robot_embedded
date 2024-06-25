@@ -10,14 +10,13 @@ def close_mission(mission):
         session = Session()
 
         mission.is_active = False 
+
         session.commit()
+        session.close()
 
         logger.info("Robot reached the destination") 
     except Exception as e:
         logger.error(f"Error occured: {e}") 
-    finally:
-        if session is not None:
-            session.close()
 
 def get_destination(mission):
     """
@@ -47,11 +46,10 @@ def get_robot():
             return robot
         else:
             logger.warning("No record found in database robot.")
+
+        session.close()
     except Exception as e:
         logger.error(f"Error occured: {e}") 
-    finally:
-        if session is not None:
-            session.close()
 
 def get_location():
     try:
@@ -66,8 +64,7 @@ def get_location():
             return location 
         else:
             logger.warning("Location record is not found.")
+
+        session.close()
     except Exception as e:
         logger.error(f"Error occured: {e}") 
-    finally:
-        if session is not None:
-            session.close()

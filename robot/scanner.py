@@ -43,9 +43,6 @@ class Scanner:
             else:
                 self.logger.info(f"{area_name} is not the destination area.")
 
+            session.close()
         except Exception as e:
             self.logger.error(f"Error occured: {e}") 
-
-        finally:
-            if session is not None:
-                session.close()
