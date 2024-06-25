@@ -27,16 +27,16 @@ class Camera(object):
     def __init__(self):
         self.open_camera()
 
-        self.frame_reader = FrameReader(self.cap)
-        self.frame_reader.daemon = True
-        self.frame_reader.start()
-
-        self.previewer = Previewer(self.frame_reader)
-
     def open_camera(self):
         self.cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
         if not self.cap.isOpened():
             raise RuntimeError("Failed to open camera!")
+
+        self.frame_reader = FrameReader(self.cap)
+        self.frame_reader.daemon = True
+        self.frame_reader.start()
+
+        # self.previewer = Previewer(self.frame_reader)
 
     def getFrame(self):
         return self.frame_reader.getFrame()
