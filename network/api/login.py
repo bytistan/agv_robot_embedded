@@ -42,6 +42,5 @@ def login():
                 logger.warning("Connection is succesfully but server is not return token.")
         else:
             logger.error(f"Error occured : {response.json()}")
-
     except Exception as e:
         logger.error(f"Error occured : {e}")

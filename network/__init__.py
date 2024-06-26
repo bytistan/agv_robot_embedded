@@ -1,6 +1,6 @@
 from helper.json_helper import read_json
 
-url = "http://127.0.0.1:5000"
+url = "http://192.168.230.42:5000"
 
 auth_data = read_json("./network/auth.json")
 

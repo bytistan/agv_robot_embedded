@@ -12,7 +12,7 @@ try:
 except ModuleNotFoundError:
     from  queue import  Queue
 
-import  threading
+import threading
 import signal
 import sys
 

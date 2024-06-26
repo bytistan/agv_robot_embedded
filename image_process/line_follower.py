@@ -1,6 +1,6 @@
 import cv2
 import numpy as np 
-from settings import *
+from .settings import *
 
 class LineFollower:
     def __init__(self):
@@ -82,11 +82,13 @@ class LineFollower:
     def decision(self,data):
         black_parts = []
         for index,per in enumerate(data):
-            if per[0] > 25:
+            if per[0] > 15:
                black_parts.append(index)
-        for key in line_changer:
-            if line_changer[key] == black_parts:          
-                return key
+
+        for i in line_changer:
+            if sorted(line_changer[i]) == sorted(black_parts):
+                return i 
+
         return -1 
 
     def update(self,image):

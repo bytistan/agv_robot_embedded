@@ -1,6 +1,6 @@
 from camera.cam import Camera
-from image_processing.processer import LineFollower
-from image_processing.helper import calculate_center, is_centered
+from .processer import LineFollower
+from .helper import calculate_center, is_centered
 from engine.robot_movement import RobotMovement
 
 from database import engine 
