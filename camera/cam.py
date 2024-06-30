@@ -24,10 +24,10 @@ import sys
 
 
 def gstreamer_pipeline(
-    capture_width=1280,
-    capture_height=720,
-    display_width=640,
-    display_height=360,
+    capture_width=1920,
+    capture_height=1080,
+    display_width=1920,
+    display_height=1080,
     framerate=60,
     flip_method=0,
 ):

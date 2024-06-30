@@ -67,9 +67,18 @@ class LineFollower:
 
         return parts  
 
+    def crop_image(self,img):
+        # Number of pixels to crop from the width
+        crop_pixels = 430
+        
+        # Crop the image horizontally
+        cropped_img = img[:, crop_pixels:crop_pixels + 1080]
+        
+        return cropped_img
+
     def make_image_black_white(self,image):
         gray_image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-        _, binary_image = cv2.threshold(gray_image,127,255,cv2.THRESH_BINARY)
+        _, binary_image = cv2.threshold(gray_image,64,255,cv2.THRESH_BINARY)
         return binary_image
 
     def create_pertange_data(self,parts):
@@ -79,21 +88,20 @@ class LineFollower:
             data.append([black_ratio,white_ratio])
         return data 
 
-    def decision(self,data):
+    def black_parts(self,data):
         black_parts = []
         for index,per in enumerate(data):
-            if per[0] > 15:
-               black_parts.append(index)
-
-        for i in line_changer:
-            if sorted(line_changer[i]) == sorted(black_parts):
-                return i 
-
-        return -1 
+            if per[0] > 50:
+                black_parts.append(index)
+        return black_parts            
 
     def update(self,image):
+        image = self.crop_image(image)
         binary_image = self.make_image_black_white(image)
+        cv2.imwrite("test.png",binary_image)
         parts = self.div_image(binary_image)
         data = self.create_pertange_data(parts)
-        order = self.decision(data)
-        return order
+        black_parts = self.black_parts(data)
+        for i,item in enumerate(data):
+            print(i,item)
+        return sorted(black_parts) 

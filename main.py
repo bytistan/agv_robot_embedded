@@ -6,12 +6,11 @@ from models import *
 from database import engine 
 from sqlalchemy.orm import sessionmaker
 
-# from robot.robot import Robot
+from robot.robot import Robot
 
-from network.api.login import login
 from network import url, auth_data
 from logger import logger
-# from system_startup import SystemStartup
+from system_startup import SystemStartup
 
 import socketio
 from camera.cam import Camera
@@ -22,8 +21,7 @@ import cv2
 
 # system_startup = SystemStartup()
 sio = socketio.Client()
-
-# robot = Robot(logger,sio)
+robot = Robot()
 
 @sio.event
 def connect():
@@ -67,14 +65,4 @@ if __name__ == "__main__":
     # Create database and insert some information.
     Base.metadata.create_all(engine)
     init_()
-    line_follower = LineFollower()
-    camera = Camera()
-    frame = camera.getFrame()
-    camera.close()
-
-    start_time = time.time()
-    line_follower = LineFollower()
-    result = line_follower.update(frame)
-    end_time = time.time()
-
-    print(f"Speed : {end_time - start_time}\n Result : {result}")
+    robot.run() 

@@ -1,81 +1,65 @@
 from camera.cam import Camera
-from .processer import LineFollower
-from .helper import calculate_center, is_centered
-from engine.robot_movement import RobotMovement
+from image_process.line_follower import LineFollower
+# from .engine import send,connect_to_server
+import time
+from .turner import Turner
 
-from database import engine 
-from sqlalchemy.orm import sessionmaker
-
-from .helper import get_location, get_robot, close_mission
+class Direction():
+    def __init__(self,x=0,y=0):
+        self.x = x
+        self.y = y
 
 class Robot:
-    def __init__(self,logger,sio):
+    def __init__(self):
         self.camera = Camera()
         self.line_follower = LineFollower()
-        self.robot_movement = RobotMovement()
+        self.turner = Turner()
 
-        # For server connection  
-        self.sio = sio
+        self.protocols = None 
+        self.mode = {
+                "turn":None  
+        }  
+        self.order = -1  
+        self.direction = Direction()
 
-        # Returns information about the robot.
-        self.logger = logger 
+        self.data = {
+            "line_status":None,
+        }
 
-        # Information about the robot is stored in the data variable when the program runs.
-        self.robot = get_robot()
+    def do_protocol(self,p,data):
+        move = p.get("move")
+        speed = p.get("speed")
+        to = p.get("to")
 
-        # Using for odoymetry.
-        self.wheel_perimeter = 0
+        line_status = data.get("line_status")
 
-        # Line tolerance when robot turn.
-        self.tolerance = 20
+        if to == line_status:
+            send(move,speed)
 
-        # Mission information coming from when robot run function call.
-        self.mission = None
 
-        # destination information.
-        self.destination = None
-
-        # Protocols for compicated mission.
-        self.protocol = []
-
-        # Robot location.
-        self.location = get_location() 
-
-    def odoymetry(self):
-        """
-            Function Explanation : Adds the diameter of the wheel to its position, looking in the direction the robot is traveling. 
-            
-            NOTE: For negative directions, the wheel's age is multiplied by -1.
-        """
-        try:
-            Session = sessionmaker(bind=engine)
-            session = Session()
-
-            value = self.wheel_perimeter
-
-            # If robot going negative direction make value negative.
-            if self.location.direction in [0,2]: 
-               value *= -1 
-                
-            if self.location:
-                if self.location.direction in [0,1]:
-                    # If location is vertical add the wheel perimeter to vertical coordinate.
-                    self.location.vertical_coordinate = self.location.vertical_coordinate + value 
-                elif location.direction in [2,3]:
-                    # If location is horizontal add the wheel perimeter to horizontal coordinate.
-                    self.location.horizontal_coordinate = self.location.horizontal_coordinate + value 
-                session.commit()
-                session.close()
-
-        except Exception as e:
-            self.logger.error(f"Error occured: {e}") 
-
-    def turn(self):
-        pass
-
-    def run(self,mission):
-
-        self.mission = mission
+    def run(self):
         while True:
-            frame = self.camera.get_frame()
-            line_status = self.line_follower.process(frame)            
+            try:
+                image = self.camera.getFrame()
+                self.camera.close()
+                start_time = time.time()
+                data = self.line_follower.update(image)
+                end_time = time.time()
+
+                p = self.turner.update(data)
+                if p and self.mode.get("turn"):
+                    self.mode["turn"] = p
+
+                print(p)
+
+                if not data:
+                    pass
+                    # send(0)
+                print(f"Speed : {end_time - start_time}, {60/(end_time - start_time)}")
+                # p = self.line_center.update(data)
+                break
+
+            except KeyboardInterrupt:
+                self.camera.close()
+
+        print("[-] Stop")
