@@ -8,13 +8,15 @@ class Turner():
                         "move": 4,
                         "speed":30,
                         "to": [1,4,5],
-                        "complated":False
+                        "complated":False,
+                        "process":False
                     },
                     {
                         "move": 1,
                         "speed":25,
                         "to": [1,4,7],
-                        "complated":False
+                        "complated":False,
+                        "process":False
                     } 
                 ]
             }, 
@@ -25,14 +27,16 @@ class Turner():
                         "move": 3,
                         "speed":30,
                         "to": [1,3,4],
-                        "complated":False
+                        "complated":False,
+                        "process":False
                     },
                     {
                     
                         "move": 1,
                         "speed":25,
                         "to": [1,4,7],
-                        "complated":False
+                        "complated":False,
+                        "process":False
                     } 
                 ]
             } 

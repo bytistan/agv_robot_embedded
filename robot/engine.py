@@ -7,7 +7,7 @@ raspi_sio = socketio.Client()
 
 password = "__h0m0l__"
 
-def send(order,speed):
+def send(order,speed=None):
     raspi_sio.emit("_235",{"order":order,"speed":speed})
 
 @raspi_sio.event
@@ -27,7 +27,7 @@ def order_response(data):
 
 def connect_to_server():
     try:
-        raspi_sio.connect("http://192.168.31.215:5001", auth={"password": password})
+        raspi_sio.connect("http://192.168.230.215:5001", auth={"password": password})
         raspi_sio.wait()  # This will block, so it should be run in a thread
         time.sleep(4)
     except KeyboardInterrupt:

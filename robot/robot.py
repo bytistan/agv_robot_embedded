@@ -3,6 +3,7 @@ from image_process.line_follower import LineFollower
 # from .engine import send,connect_to_server
 import time
 from .turner import Turner
+import cv2 
 
 class Direction():
     def __init__(self,x=0,y=0):
@@ -34,32 +35,53 @@ class Robot:
         line_status = data.get("line_status")
 
         if to == line_status:
-            send(move,speed)
-
-
+           #  send(move,speed)
+            pass
     def run(self):
         while True:
             try:
                 image = self.camera.getFrame()
                 self.camera.close()
+                 
                 start_time = time.time()
-                data = self.line_follower.update(image)
+                data = self.line_follower.process(image)
                 end_time = time.time()
 
+                print(end_time - start_time)
+
+                break        
                 p = self.turner.update(data)
+
+                if data == [1,4,7]:
+        #            send(1,25)
+                    pass
                 if p and self.mode.get("turn"):
                     self.mode["turn"] = p
 
-                print(p)
+                if self.mode.get("turn"):
+                    flag = False
+                    for protocol in self.mode.get("turn"):
+                        if not protocol.get("complated") and not protocol.get("process"):
+                            # send(protocol.get("move"),protocol.get("speed"))
+                            flag = True
+                            protocol["process"] = True 
 
+                        if protocol.get("process") and protocol.get("to") == data:
+                                protocol["complated"] = True
+                                
+                    if not flag:
+                        self.mode["turn"] = None
+                        #send(0)
+                        break
+                    
                 if not data:
                     pass
                     # send(0)
-                print(f"Speed : {end_time - start_time}, {60/(end_time - start_time)}")
-                # p = self.line_center.update(data)
-                break
+                    self.camera.close()
+                    break
 
             except KeyboardInterrupt:
                 self.camera.close()
-
+        
+        # send(0)
         print("[-] Stop")
