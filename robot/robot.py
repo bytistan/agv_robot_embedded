@@ -1,6 +1,6 @@
 from camera.cam import Camera
-from image_process.line_follower import LineFollower
-# from .engine import send,connect_to_server
+from image_process.line_follower import LineFollower,center_process
+from .engine import send,connect_to_server
 import time
 from .turner import Turner
 import cv2 
@@ -16,10 +16,10 @@ class Robot:
         self.line_follower = LineFollower()
         self.turner = Turner()
 
-        self.protocols = None 
         self.mode = {
-                "turn":None  
+            "turn":None  
         }  
+
         self.order = -1  
         self.direction = Direction()
 
@@ -27,61 +27,69 @@ class Robot:
             "line_status":None,
         }
 
-    def do_protocol(self,p,data):
+    def do_protocol(self,p,m,index,data):
         move = p.get("move")
         speed = p.get("speed")
         to = p.get("to")
 
         line_status = data.get("line_status")
-
+        if not self.mode.get(m)[index].get("process"):
+            send(move,speed)
+            self.mode[m][index]["process"] = True 
+            
         if to == line_status:
-           #  send(move,speed)
-            pass
+            print("[+] Completed")
+            self.mode[m][index]["complated"] = True
+            self.mode[m][index]["process"] = False
+
+    def check_protocol(self):
+        for m,protocols in self.mode.items():
+            if protocols:
+                for index,protocol in enumerate(protocols):
+                    if not protocol.get("complated"):
+                        return (protocol,m,index)
+                self.mode[m] = None  
+            
+    def camera_test(self):
+        start_time = time.time()
+        c = 0
+        while True:
+            c += 1
+            try:
+                image = self.camera.getFrame()
+                start_time = time.time() 
+                data = center_process(image)
+                end_time = time.time() 
+                print(data)
+            except KeyboardInterrupt:
+                self.camera.close()
+                t = time.time() - start_time
+                if t > 1:
+                    print(c,t)
+                    break
+                print(f"[-] Quit")
+            except Exception as e:
+                self.camera.close()
+                print(f"Error : {e}")
+
     def run(self):
         while True:
             try:
                 image = self.camera.getFrame()
-                self.camera.close()
                  
-                start_time = time.time()
-                data = self.line_follower.process(image)
-                end_time = time.time()
+                self.data["line_status"] = center_process(image)
+                new_protocol = self.turner.update(self.data.get("line_status"))
 
-                print(end_time - start_time)
-
-                break        
-                p = self.turner.update(data)
-
-                if data == [1,4,7]:
-        #            send(1,25)
-                    pass
-                if p and self.mode.get("turn"):
-                    self.mode["turn"] = p
-
-                if self.mode.get("turn"):
-                    flag = False
-                    for protocol in self.mode.get("turn"):
-                        if not protocol.get("complated") and not protocol.get("process"):
-                            # send(protocol.get("move"),protocol.get("speed"))
-                            flag = True
-                            protocol["process"] = True 
-
-                        if protocol.get("process") and protocol.get("to") == data:
-                                protocol["complated"] = True
-                                
-                    if not flag:
-                        self.mode["turn"] = None
-                        #send(0)
-                        break
-                    
-                if not data:
-                    pass
-                    # send(0)
-                    self.camera.close()
-                    break
+                if new_protocol and not self.mode.get("turn"):
+                    self.mode["turn"] = new_protocol
+                 
+                protocol = self.check_protocol()
+            
+                if protocol: 
+                    self.do_protocol(protocol[0] ,protocol[1] ,protocol[2] ,self.data)
 
             except KeyboardInterrupt:
                 self.camera.close()
-        
-        # send(0)
-        print("[-] Stop")
+            except Exception as e:
+                self.camera.close()
+                print(f"Error : {e}")

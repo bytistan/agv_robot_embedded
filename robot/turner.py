@@ -5,8 +5,8 @@ class Turner():
                 "fi":[4,5,7],
                 "protocol":[
                     {
-                        "move": 4,
-                        "speed":30,
+                        "move": 5,
+                        "speed":25,
                         "to": [1,4,5],
                         "complated":False,
                         "process":False
@@ -17,6 +17,13 @@ class Turner():
                         "to": [1,4,7],
                         "complated":False,
                         "process":False
+                    },
+                    {
+                        "move": 0,
+                        "speed":0,
+                        "to": [],
+                        "complated":False,
+                        "process":False
                     } 
                 ]
             }, 
@@ -24,8 +31,8 @@ class Turner():
                 "fi":[3,4,7],
                 "protocol":[
                     {
-                        "move": 3,
-                        "speed":30,
+                        "move": 6,
+                        "speed":25,
                         "to": [1,3,4],
                         "complated":False,
                         "process":False
@@ -35,6 +42,13 @@ class Turner():
                         "move": 1,
                         "speed":25,
                         "to": [1,4,7],
+                        "complated":False,
+                        "process":False
+                    }, 
+                    {
+                        "move": 0,
+                        "speed":0,
+                        "to": [],
                         "complated":False,
                         "process":False
                     } 
