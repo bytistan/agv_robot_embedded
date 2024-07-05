@@ -22,12 +22,11 @@ import sys
 #     sys.exit(0)
 # signal.signal(signal.SIGINT, signal_handler)
 
-
 def gstreamer_pipeline(
     capture_width=1920,
     capture_height=1080,
-    display_width=1920,
-    display_height=1080,
+    display_width=1280,
+    display_height=720,
     framerate=60,
     flip_method=0,
 ):
@@ -39,10 +38,11 @@ def gstreamer_pipeline(
         "nvvidconv flip-method=%d ! "
         "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
         "videoconvert ! "
-        "video/x-raw, format=(string)BGR ! appsink"
+        "video/x-raw, format=(string)GRAY8 ! appsink"
         % (
             capture_width,
-            capture_height, framerate,
+            capture_height,
+            framerate,
             flip_method,
             display_width,
             display_height,

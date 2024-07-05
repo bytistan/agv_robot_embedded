@@ -27,7 +27,7 @@ def order_response(data):
 
 def connect_to_server():
     try:
-        raspi_sio.connect("http://192.168.31.215:5001", auth={"password": password})
+        raspi_sio.connect("http://192.168.113.215:5001", auth={"password": password})
         raspi_sio.wait()  # This will block, so it should be run in a thread
         time.sleep(5)
     except KeyboardInterrupt:

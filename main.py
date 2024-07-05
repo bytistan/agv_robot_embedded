@@ -75,9 +75,11 @@ def handle_c1(data):
     """
 
     if 199 < int(data.get("status")) < 300:
-        print(f"[+] Connected to the server.\n[+] Status code : {data.get('status')}")
+        pass
+        # print(f"[+] Connected to the server.\n[+] Status code : {data.get('status')}")
     else:
-        print(f"[!] Not connect to do server.\n[!] Status code : {data.get('status')}")
+        pass
+        # print(f"[!] Not connect to do server.\n[!] Status code : {data.get('status')}")
 
 if __name__ == "__main__":
     robot = Robot(sio)
@@ -86,4 +88,4 @@ if __name__ == "__main__":
     # Create database and insert some information.
     Base.metadata.create_all(engine)
     init_()
-    robot.camera_test() 
+    robot.run() 

@@ -7,19 +7,27 @@ Vehicle Movement :
     - 5 : TURN_RIGHT
     - 6 : TURN_LEFT
 """
-
+import copy 
 
 class LineCenter():
     def __init__(self):
-        
         self.data = [ 
             { 
                 "fi":[0,3,6],
                 "protocol":[
                     {
-                        "move": 4,
+                        "move": 3,
+                        "speed":30,
                         "to": [1,4,7],
-                        "complated":False
+                        "complated":False,
+                        "process":False
+                    },
+                    {
+                        "move": 0,
+                        "speed":0,
+                        "to": [1,4,7],
+                        "complated":False,
+                        "process":False
                     } 
                 ]
             }, 
@@ -27,9 +35,18 @@ class LineCenter():
                 "fi":[2,5,8],
                 "protocol":[
                     {
-                        "move": 3,
+                        "move": 4,
+                        "speed":30,
                         "to": [1,4,7],
-                        "complated":False
+                        "complated":False,
+                        "process":False
+                    },
+                    {
+                        "move": 0,
+                        "speed":0,
+                        "to": [1,4,7],
+                        "complated":False,
+                        "process":False
                     } 
                 ]
             }, 
@@ -38,8 +55,8 @@ class LineCenter():
     def line_center(self,ls):
         for data in self.data:
             if data.get("fi") == ls:
-                return data.get("fi")
-        return -1
+                return copy.deepcopy(data.get("protocol"))
+        return None 
 
     def update(self,ls):
         return self.line_center(ls)

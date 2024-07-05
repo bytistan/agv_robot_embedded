@@ -1,9 +1,10 @@
 from camera.cam import Camera
-from image_process.line_follower import LineFollower,center_process
+from image_process.line_follower import LineFollower
 from network.engine import send,connect_to_server
 
 from .helper import get_robot, get_connection
 from .turner import Turner
+from .line_center import LineCenter
 
 import cv2 
 import time 
@@ -20,7 +21,7 @@ class Robot:
         self.turner = Turner()
 
         self.mode = {
-            "turn":None  
+            "line_center":None  
         }  
 
         self.order = -1  
@@ -35,6 +36,8 @@ class Robot:
         self.robot = get_robot()
 
         self.connection = get_connection()
+
+        self.line_center = LineCenter()
 
     def do_protocol(self,p,m,index,data):
         move = p.get("move")
@@ -62,32 +65,31 @@ class Robot:
     def camera_test(self):
         while True:
             try:
-                # image = self.camera.getFrame()
-                # data = center_process(image)
-                time.sleep(1)
-                self.sio.emit("_c6" ,{"room":self.robot.serial_number,"message":"tomato"})
-                print("[+] Running")
-                break
+                image = self.camera.getFrame()
+                data = self.line_follower.controller(image)
+                print(data)
             except KeyboardInterrupt:
-                # self.camera.close()
+                self.camera.close()
                 print(f"[-] Quit")
+                break
             except Exception as e:
                 self.camera.close()
                 print(f"[-] Error : {e}")
+                break
 
     def run(self):
         while True:
             try:
                 image = self.camera.getFrame()
                  
-                self.data["line_status"] = center_process(image)
-                new_protocol = self.turner.update(self.data.get("line_status"))
+                self.data["line_status"] = self.line_follower.controller(image)
+                new_protocol = self.line_center.update(self.data.get("line_status"))
 
-                if new_protocol and not self.mode.get("turn"):
-                    self.mode["turn"] = new_protocol
-                 
+                if new_protocol and not self.mode.get("line_center"):
+                    self.mode["line_center"] = new_protocol
+                                 
                 protocol = self.check_protocol()
-            
+                
                 if protocol: 
                     self.do_protocol(protocol[0] ,protocol[1] ,protocol[2] ,self.data)
 
