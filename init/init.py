@@ -9,10 +9,13 @@ def init_():
 
     Session = sessionmaker(bind=engine)
     session = Session()
+
     filtered_robot = session.query(Robot).filter(Robot.serial_number == data.get("serial_number")).first()
+
     if not filtered_robot:
         robot = Robot(serial_number=data.get("serial_number"),mode=data.get("mode"),secret_key=data.get("secret_key"))
 
         session.add(robot)
         session.commit()
+
     session.close()

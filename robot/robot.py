@@ -1,17 +1,20 @@
 from camera.cam import Camera
 from image_process.line_follower import LineFollower,center_process
-from .engine import send,connect_to_server
-import time
+from network.engine import send,connect_to_server
+
+from .helper import get_robot, get_connection
 from .turner import Turner
+
 import cv2 
+import time 
 
 class Direction():
-    def __init__(self,x=0,y=0):
-        self.x = x
-        self.y = y
+    def __init__(self,x=0,y=0): 
+        self.x = x 
+        self.y = y 
 
 class Robot:
-    def __init__(self):
+    def __init__(self,sio):
         self.camera = Camera()
         self.line_follower = LineFollower()
         self.turner = Turner()
@@ -26,6 +29,12 @@ class Robot:
         self.data = {
             "line_status":None,
         }
+
+        self.sio = sio
+        
+        self.robot = get_robot()
+
+        self.connection = get_connection()
 
     def do_protocol(self,p,m,index,data):
         move = p.get("move")
@@ -51,26 +60,20 @@ class Robot:
                 self.mode[m] = None  
             
     def camera_test(self):
-        start_time = time.time()
-        c = 0
         while True:
-            c += 1
             try:
-                image = self.camera.getFrame()
-                start_time = time.time() 
-                data = center_process(image)
-                end_time = time.time() 
-                print(data)
+                # image = self.camera.getFrame()
+                # data = center_process(image)
+                time.sleep(1)
+                self.sio.emit("_c6" ,{"room":self.robot.serial_number,"message":"tomato"})
+                print("[+] Running")
+                break
             except KeyboardInterrupt:
-                self.camera.close()
-                t = time.time() - start_time
-                if t > 1:
-                    print(c,t)
-                    break
+                # self.camera.close()
                 print(f"[-] Quit")
             except Exception as e:
                 self.camera.close()
-                print(f"Error : {e}")
+                print(f"[-] Error : {e}")
 
     def run(self):
         while True:
@@ -92,4 +95,4 @@ class Robot:
                 self.camera.close()
             except Exception as e:
                 self.camera.close()
-                print(f"Error : {e}")
+                print(f"[-] Error : {e}")
