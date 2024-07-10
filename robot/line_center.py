@@ -17,7 +17,7 @@ class LineCenter():
                 "protocol":[
                     {
                         "move": 3,
-                        "speed":30,
+                        "speed":25,
                         "to": [1,4,7],
                         "complated":False,
                         "process":False
@@ -36,7 +36,7 @@ class LineCenter():
                 "protocol":[
                     {
                         "move": 4,
-                        "speed":30,
+                        "speed":25,
                         "to": [1,4,7],
                         "complated":False,
                         "process":False
