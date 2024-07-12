@@ -2,7 +2,7 @@ from camera.cam import Camera
 from image_process.line_follower import LineFollower
 from network.engine import send,connect_to_server
 
-from .helper import get_robot, get_connection
+from .helper import get_connection
 from .turner import Turner
 from .line_center import LineCenter
 
@@ -15,7 +15,7 @@ class Direction():
         self.y = y 
 
 class Robot:
-    def __init__(self,sio):
+    def __init__(self,sio,robot_information):
         self.camera = Camera()
         self.line_follower = LineFollower()
         self.turner = Turner()
@@ -33,7 +33,7 @@ class Robot:
 
         self.sio = sio
         
-        self.robot = get_robot()
+        self.robot = robot_information 
 
         self.connection = get_connection()
 
@@ -73,6 +73,7 @@ class Robot:
             to = p.get("to")
 
             line_status = data.get("line_status")
+
             if not self.mode.get(m)[index].get("process"):
                 send(move,speed)
                 self.mode[m][index]["process"] = True 

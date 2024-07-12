@@ -2,39 +2,38 @@ from database import engine
 from sqlalchemy.orm import sessionmaker
 from models import *
 
-def set_mission(robot,road_maps):
+def set_mission(robot,data):
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
 
-        active_mission = session.query(Mission).filter().first()
+        active_mission = session.query(Mission).filter(Mission.is_active == True).first()
+        any_active_mission = False if active_mission else True 
 
-        mission = Mission(robot_id = robot.id)
+        mission = Mission(robot_id = robot.id,is_active = any_active_mission)
 
         session.add(mission) 
         session.flush()
 
-        for road_map in road_maps:
-            tmp_area_name = road_map.get("area_name")
-
-            qr_code = session.query(QRCode).filter(area_name = tmp_area_name).first()
+        for road_map in data:
+            qr_code = session.query(QRCode).filter(QRCode.area_name==road_map.get("area_name")).first()
 
             if not qr_code:
                 print("[!] Qr not found.") 
                 return None
 
-            road_map = RoadMap(
-                    mission_id = mission.id,
-                    qr_code_id = qr_code.id,
-                    area_name = road_map.get("area_name"),
-                    index = road_map.get("index")
-            ) 
+            rm = RoadMap(
+                mission_id = mission.id,
+                qr_code_id = qr_code.id,
+                index = road_map.get("index")
+            )
                                             
-            session.add(road_map)
+            session.add(rm)
                     
         session.commit()
         session.close()
     except Exception as e:
+        session.close()
         print(f"[-] Error occured: {e}") 
 
 def get_connection():
@@ -48,16 +47,15 @@ def get_connection():
             print("[+] Connection record found.")
             return connection 
         else:
-            print("[-] No record found in database robot.")
+            print("[-] No connection record found in database .")
 
         session.close()
     except Exception as e:
+        session.close()
         print(f"[-] Error occured: {e}") 
 
 def close_mission(mission):
-    """
-        Function Explanation : Basicly update the mission value.
-    """
+    # Function Explanation : Basicly update the mission value.
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -67,14 +65,13 @@ def close_mission(mission):
         session.commit()
         session.close()
 
-        print("[+] Robot reached the destination") 
+        print("[+] Robot reached the destination.") 
     except Exception as e:
-        print(f"[-] Error occured: {e}") 
+        session.close()
+        print(f"[-] Error occured: {e}.") 
 
 def get_destination(mission):
-    """
-        Function Explanation : Simply put, it finds the target qr code through index numbers.
-    """
+    # Function Explanation : Simply put, it finds the target qr code through index numbers.
     try:
         destination = None
         for road_map in mission.road_map:
@@ -84,7 +81,7 @@ def get_destination(mission):
                 destination = road_map
         return destination 
     except Exception as e:
-        print(f"[-] Error occured: {e}") 
+        print(f"[-] Error occured: {e}.") 
 
 def get_robot():
     try:
@@ -102,6 +99,7 @@ def get_robot():
 
         session.close()
     except Exception as e:
+        session.close()
         print(f"[-] Error occured: {e}") 
 
 def get_location():
@@ -120,4 +118,5 @@ def get_location():
 
         session.close()
     except Exception as e:
+        session.close()
         print(f"[-] Error occured: {e}") 

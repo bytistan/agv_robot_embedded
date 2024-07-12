@@ -8,9 +8,9 @@ class Mission(Base):
     
     id = Column(Integer, primary_key=True)
     robot_id = Column(Integer, ForeignKey("robot.id"))
+
     is_active = Column(Boolean, default=False)
-    rank = Column(Integer, nullable=False)
-    secret_key = Column(String, nullable=False)
+    rank = Column(Integer, nullable=False,default=0)
     synchronized = Column(Boolean,default=False)
 
     mission_end_time = Column(DateTime)
@@ -20,8 +20,3 @@ class Mission(Base):
     location = relationship("Location", back_populates="mission")
     road_map = relationship("RoadMap", back_populates="mission")
     robot_information = relationship("RobotInformation", back_populates="mission")
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(**data)
-

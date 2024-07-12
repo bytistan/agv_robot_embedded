@@ -12,7 +12,7 @@ class QRCode(Base):
     vertical_coordinate = Column(Float, nullable=False)
     horizontal_coordinate = Column(Float, nullable=False)
     
-    area_name = Column(Integer,nullable=True)
+    area_name = Column(String,nullable=True)
 
     synchronized = Column(Boolean,default=False)
 

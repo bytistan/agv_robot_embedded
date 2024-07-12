@@ -27,5 +27,5 @@ if __name__ == "__main__":
     init_()
     init_default_qr()
 
-    # client = RobotClient(auth_data)
-    # client.start(url)
+    client = RobotClient(auth_data)
+    client.start(url)

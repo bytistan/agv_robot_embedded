@@ -16,8 +16,3 @@ class Connection(Base):
     created_date = Column(DateTime, default=datetime.utcnow)
 
     robot = relationship("Robot", back_populates="connection")
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(**data)
-

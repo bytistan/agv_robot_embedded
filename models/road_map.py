@@ -21,8 +21,3 @@ class RoadMap(Base):
 
     mission = relationship("Mission", back_populates="road_map")
     qr_code = relationship("QRCode", back_populates="road_map")
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(**data)
-
