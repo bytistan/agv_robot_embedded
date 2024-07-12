@@ -8,8 +8,10 @@ class QRCode(Base):
     
     id = Column(Integer, primary_key=True)
     robot_id = Column(Integer, ForeignKey("robot.id"))
+
     vertical_coordinate = Column(Float, nullable=False)
-    horizontall_coordinate = Column(Float, nullable=False)
+    horizontal_coordinate = Column(Float, nullable=False)
+    
     area_name = Column(Integer,nullable=True)
 
     synchronized = Column(Boolean,default=False)

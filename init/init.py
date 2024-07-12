@@ -2,7 +2,27 @@ from database import engine
 from helper.json_helper import read_json
 from helper.security import generate_secret_key
 from models.robot import Robot
+from models.qr_code import QRCode
 from sqlalchemy.orm import sessionmaker
+from . import DEFAULT_QR
+
+def init_default_qr():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    robot = session.query(Robot).filter(Robot.id > 0).first()
+
+    for qr in DEFAULT_QR:
+        if not session.query(QRCode).filter(QRCode.area_name==qr.get("area_name")).first():
+            session.add(QRCode(
+                robot_id = robot.id,
+                vertical_coordinate = qr.get("vertical_coordinate"),
+                horizontal_coordinate = qr.get("horizontal_coordinate"),
+                area_name = qr.get("area_name")
+            ))
+
+    session.commit()
+    session.close()
 
 def init_():
     data = read_json("./init/init.json").get("robot")

@@ -2,6 +2,41 @@ from database import engine
 from sqlalchemy.orm import sessionmaker
 from models import *
 
+def set_mission(robot,road_maps):
+    try:
+        Session = sessionmaker(bind=engine)
+        session = Session()
+
+        active_mission = session.query(Mission).filter().first()
+
+        mission = Mission(robot_id = robot.id)
+
+        session.add(mission) 
+        session.flush()
+
+        for road_map in road_maps:
+            tmp_area_name = road_map.get("area_name")
+
+            qr_code = session.query(QRCode).filter(area_name = tmp_area_name).first()
+
+            if not qr_code:
+                print("[!] Qr not found.") 
+                return None
+
+            road_map = RoadMap(
+                    mission_id = mission.id,
+                    qr_code_id = qr_code.id,
+                    area_name = road_map.get("area_name"),
+                    index = road_map.get("index")
+            ) 
+                                            
+            session.add(road_map)
+                    
+        session.commit()
+        session.close()
+    except Exception as e:
+        print(f"[-] Error occured: {e}") 
+
 def get_connection():
     try:
         Session = sessionmaker(bind=engine)

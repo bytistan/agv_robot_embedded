@@ -42,9 +42,11 @@ class Robot:
         self.start_time = time.time()
         self.loop_time = None 
         self.interval = 1
+        
+        self.mission = None 
 
         self.status = {
-            "start_time":time.strftime('%H.%M', time.localtime(self.start_time)),
+            "start_time":time.strftime("%H.%M", time.localtime(self.start_time)),
             "battery":0,
             "speed":0,
             "tempature":0,
@@ -108,8 +110,10 @@ class Robot:
                 print(f"[-] Error : {e}")
                 break
 
-    def run(self):
+    def run(self,mission):
         self.loop_time = time.time() 
+        self.mission = mission
+        return 
 
         while True:
             try:
