@@ -1,4 +1,4 @@
-from camera.cam import Camera
+from camera.cam import Camera 
 from image_process.line_follower import LineFollower
 from network.engine import send,connect_to_server
 
@@ -99,7 +99,7 @@ class Robot:
     def camera_test(self):
         while True:
             try:
-                image = self.camera.getFrame()
+                image = self.camera.get_frame()
                 data = self.line_follower.controller(image)
                 print(data)
             except KeyboardInterrupt:
@@ -121,7 +121,7 @@ class Robot:
                 # Putting for testing purpose
                 time.sleep(1)
 
-                # image = self.camera.getFrame()
+                # image = self.camera.get_frame()
                  
                 # self.data["line_status"] = self.line_follower.controller(image)
                 # new_protocol = self.line_center.update(self.data.get("line_status"))
