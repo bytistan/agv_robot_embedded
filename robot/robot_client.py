@@ -1,4 +1,6 @@
 import socketio
+from termcolor import colored
+
 from .helper import set_mission ,get_robot
 from .robot import Robot 
 
@@ -6,6 +8,7 @@ class RobotClient:
     def __init__(self, auth_data):
         self.sio = socketio.Client()
         self.auth_data = auth_data
+
         self.robot_information = get_robot()
 
         self.robot = Robot(self.sio,self.robot_information)
@@ -16,75 +19,68 @@ class RobotClient:
         self.sio.event(self.disconnect)
         self.sio.event(self.quit)
 
-        self.sio.on("_sc1", self.handle_sc1)
-        self.sio.on("_sc6", self.handle_sc6)
-        self.sio.on("_s11", self.handle_s11)
+        self.sio.on("mission", self.handle_mission)
+        self.sio.on("join_robot", self.handle_robot_connection)
 
     def connect(self):
         try:
-            self.sio.emit("_11", self.auth_data)
-            print("[+] Successfully connected to the server.")
+            self.sio.emit("join_robot", self.auth_data)
+            print(colored("[INFO] Successfully connected to the server.", "green" ,attrs=["bold"]))
         except Exception as e:
-            print(f"[-] Error : {e}")
+            print(colored(f"[ERR] {e}", "red" ,attrs=["bold"]))
 
     def connect_error(self, data):
         try:
-            print("[+] Failed to connect to the server.")
+            print(colored("[INFO] Failed to connect to the server.", "yellow" ,attrs=["bold"]))
         except Exception as e:
-            print(f"[-] Error : {e}")
+            print(colored(f"[ERR] {e}", "red" ,attrs=["bold"]))
 
     def disconnect(self):
         try:
-            print("[+] Disconnected from the server.")
+            print(colored("[INFO] Disconnected from the server.", "yellow" ,attrs=["bold"]))
         except Exception as e:
-            print(f"[-] Error : {e}")
+            print(colored(f"[ERR] {e}", "red" ,attrs=["bold"]))
 
     def quit(self):
         try:
-            self.sio.emit("_10", self.auth_data)
-            print("[+] Successfully quit from the server.")
+            self.sio.emit("leave_robot", self.auth_data)
+            print(colored("[INFO] Successfully quit from the server.", "green" ,attrs=["bold"]))
         except Exception as e:
-            print(f"[-] Error : {e}")
+            print(colored(f"[ERR] {e}", "red" ,attrs=["bold"]))
 
-    def handle_sc1(self, data):
+    def handle_mission(self, data):
         try:
-            # Function Explanation : Handle mission coming from user.
-
             if not data.get("message"):
-                print(f"[-] Invalid message : {data}")
-
-            set_mission(self.robot_information,data.get("message"))
-            # self.robot.run(data)
+                print(colored(f"[WARN] Invalid message : {data}.", "yellow" ,attrs=["bold"])) 
+            
+            id = set_mission(self.robot_information.get("id"),data.get("message"))
+            self.robot.run({"id":id})
         except Exception as e:
-            print(f"[-] Error : {e}")
+            print(colored(f"[ERR] {e}", "red" ,attrs=["bold"]))
 
-    def handle_sc6(self, data):
+    def handle_camera(self, data):
         try:
-            # Function Explanation : Handle camera coming from robot.
             if 199 < int(data.get("status")) < 300:
-                print(f"[+] Camera information succesfuly send to server.\n[+] Status code : {data.get('status')}")
+                print(colored(f"[INFO] Camera information succesfuly send to server.\n[WARN] Status code : {data.get('status')}", "green", attrs=["bold"])) 
             else:
-                print(f"[!] Not connect to do server.\n[!] Status code : {data.get('status')}")
+                print(colored(f"[WARN] Not connect to do server.\n[WARN] Status code : {data.get('status')}", "yellow", attrs=["bold"])) 
         except Exception as e:
-            print(f"[-] Error : {e}")
+            print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
 
-    def handle_s11(self, data):
+    def handle_robot_connection(self, data):
         try:
-            # Function Explanation : Handle connection from robot.
             if 199 < int(data.get("status")) < 300:
-                pass
-                # print(f"[+] Connected to the server.\n[+] Status code : {data.get('status')}")
+                print(colored(f"[INFO] Connected to the server.\n[INFO] Status code : {data.get('status')}", "green", attrs=["bold"]))
             else:
-                pass
-                # print(f"[!] Not connect to do server.\n[!] Status code : {data.get('status')}")
+                print(colored(f"[WARN] Not connect to do server.\n[WARN] Status code : {data.get('status')}", "yellow", attrs=["bold"]))
         except Exception as e:
-            print(f"[-] Error : {e}")
+            print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
 
     def start(self, server_url):
         try:
             self.sio.connect(server_url)
             self.sio.wait()
         except KeyboardInterrupt:
-            print(f"[-] Error : {e}")
+            print(colored("[WARN] Connection forcibly closed.", "yellow" ,attrs=["bold"]))
         except Exception as e:
-            print(f"[-] Error : {e}")
+            print(colored(f"[ERR] {e}", "red" ,attrs=["bold"]))

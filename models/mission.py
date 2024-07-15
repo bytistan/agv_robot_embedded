@@ -9,11 +9,13 @@ class Mission(Base):
     id = Column(Integer, primary_key=True)
     robot_id = Column(Integer, ForeignKey("robot.id"))
 
+    completed = Column(Boolean, default=False)
     is_active = Column(Boolean, default=False)
+
     rank = Column(Integer, nullable=False,default=0)
     synchronized = Column(Boolean,default=False)
 
-    mission_end_time = Column(DateTime)
+    end_time = Column(DateTime)
     created_date = Column(DateTime, default=datetime.utcnow)
 
     robot = relationship("Robot", back_populates="mission")

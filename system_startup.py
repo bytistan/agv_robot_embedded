@@ -1,34 +1,26 @@
-from network.api.login import login
-from robot.helper import get_robot
 from network import url 
-import threading
+from network.api.login import login
+
+from init.init import init_ ,init_default_qr
+from database import engine 
+
+from models import * 
 
 class SystemStartup:
-    def __init__(self,sio):
+    def __init__(self):
+        self.create_database()
         self.token = login()
-        self.sio = sio
-        self.connect()        
-        
-    def connect(self):
-        """
-            Function Explanation : It connects to the server and stores the token in a variable for
-            later use. 
-            
-            NOTE: JWT token is used. Token duration 4 hours.
-        """
+
+    def create_database(self):
         try:
-            robot = get_robot()
+            # Create database and insert some information.
+            Base.metadata.create_all(engine)
 
-            self.sio.connect(url,{"serial_number":robot.serial_number,"secret_key":robot.secret_key})
-
-            # Create and start a new thread for the SocketIO client
-            thread = threading.Thread(target=self.sio.wait)
-            thread.start()
-
-            # Your main program can continue running here
-            print("[+] SocketIO client is running in a separate thread.")
+            init_()
+            init_default_qr()
         except Exception as e:
-            print(f"[-] Error :\n System startup [21]: {e}") 
+            print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
+
 
     def update(self):
-        pass 
+        pass

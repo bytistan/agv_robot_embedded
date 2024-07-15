@@ -1,6 +1,7 @@
 import socketio
 import threading
 import time
+from termcolor import colored
 
 # Create a SocketIO client instance raspi_sio = socketio.Client() 
 raspi_sio = socketio.Client()
@@ -12,18 +13,18 @@ def send(order,speed=None):
 
 @raspi_sio.event
 def connect():
-    print("[+] Connection established")
+    print(colored("[INFO] Connected engine.", "green" ,attrs=["bold"]))
 
 @raspi_sio.event
 def disconnect():
-    print("[-] Connection lost!")
+    print(colored("[WARN] Disconnected from engine.", "yellow" ,attrs=["bold"]))
 
 @raspi_sio.event
 def order_response(data):
     if 200 > data.get("status") > 300:
-        print("[+] Data was sent successfully.")
+        print(colored("[INFO] Data was sent successfully.", "green" ,attrs=["bold"]))
     else:
-        print("[-] Failed to send data.")
+        print(colored("[WARN] Failed to send data.", "red" ,attrs=["bold"]))
 
 def connect_to_server():
     try:
@@ -32,9 +33,9 @@ def connect_to_server():
         time.sleep(5)
     except KeyboardInterrupt:
         raspi_sio.disconnect()
-        print("[-] Disconnected")
+        print(colored("Bye :)", "yellow" ,attrs=["bold"]))
     except Exception as e: 
-        print(f"[-] Error : {e}")
+        print(colored(f"[ERR] {e}", "red" ,attrs=["bold"]))
         
 try:
     # Create and start a new thread for the SocketIO client
@@ -42,6 +43,6 @@ try:
     client_thread.start()
 
     # Your main program can continue running here
-    print("[+] SocketIO client is running in a separate thread.")
+    print(colored("[INFO] SocketIO client is running in a separate thread.", "green" ,attrs=["bold"]))
 except Exception as e: 
-    print(f"[-] Error : {e}")
+    print(colored(f"[ERR] Engine connection error : {e}", "red" ,attrs=["bold"]))

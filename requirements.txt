@@ -2,3 +2,4 @@ SQLAlchemy==2.0.30
 python-socketio==5.11.2
 requests==2.32.3
 pyzbar==0.1.9
+termcolor==2.4.0

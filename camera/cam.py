@@ -18,18 +18,34 @@ class Camera:
             print("Failed to start camera")
             exit(1)
 
-    def capture_frame(self):
-        """Capture a single frame from the ZED camera."""
+    def capture_left_frame(self):
+        """Capture a single frame from the left camera of the ZED camera."""
         
-        image_zed = sl.Mat()
+        left_image = sl.Mat()
         runtime_parameters = sl.RuntimeParameters()
+        
         if self.cam.grab(runtime_parameters) == sl.ERROR_CODE.SUCCESS:
-            # Retrieve the image in grayscale
-            self.cam.retrieve_image(image_zed, sl.VIEW.LEFT_GRAY)
-            frame = image_zed.get_data()
-            return frame
+            # Retrieve the left image in grayscale
+            self.cam.retrieve_image(left_image, sl.VIEW.LEFT_GRAY)
+            left_frame = left_image.get_data()
+            return left_frame
         else:
-            print("Failed to capture image")
+            print("Failed to capture left image")
+            return None
+
+    def capture_right_frame(self):
+        """Capture a single frame from the right camera of the ZED camera."""
+        
+        right_image = sl.Mat()
+        runtime_parameters = sl.RuntimeParameters()
+        
+        if self.cam.grab(runtime_parameters) == sl.ERROR_CODE.SUCCESS:
+            # Retrieve the right image in grayscale
+            self.cam.retrieve_image(right_image, sl.VIEW.RIGHT_GRAY)
+            right_frame = right_image.get_data()
+            return right_frame
+        else:
+            print("Failed to capture right image")
             return None
 
     def close(self):

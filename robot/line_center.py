@@ -19,14 +19,14 @@ class LineCenter():
                         "move": 3,
                         "speed":25,
                         "to": [1,4,7],
-                        "complated":False,
+                        "completed":False,
                         "process":False
                     },
                     {
                         "move": 0,
                         "speed":0,
                         "to": [1,4,7],
-                        "complated":False,
+                        "completed":False,
                         "process":False
                     } 
                 ]
@@ -38,14 +38,14 @@ class LineCenter():
                         "move": 4,
                         "speed":25,
                         "to": [1,4,7],
-                        "complated":False,
+                        "completed":False,
                         "process":False
                     },
                     {
                         "move": 0,
                         "speed":0,
                         "to": [1,4,7],
-                        "complated":False,
+                        "completed":False,
                         "process":False
                     } 
                 ]

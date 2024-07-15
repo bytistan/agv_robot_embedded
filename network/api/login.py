@@ -1,13 +1,14 @@
 import requests
+
+from datetime import datetime 
+from termcolor import colored
+from sqlalchemy.orm import sessionmaker
+
 from network import url,auth_data
 from . import login_url
 
-from database import engine 
-from sqlalchemy.orm import sessionmaker
-
+from database import db_session 
 from models.connection import Connection
-
-from datetime import datetime 
 
 def login():
     try:
@@ -17,31 +18,28 @@ def login():
         # If successfuly connect to server achive jwt token, this using for future data transfer 
         if response.status_code == 200:
             token = response.json().get("access_token")
-            print(f"[+] Token : {token}")
+            print(colored("[INFO] Login to server.", "green", attrs=["bold"]))
             if token is not None:
-                print(f"JWT Token: {token}")
-
-                Session = sessionmaker(bind=engine)
-                session = Session()
-                
-                connection = session.query(Connection).filter(Connection.id > 0).first()
+                connection = db_session.query(Connection).filter(Connection.id > 0).first()
                 if connection is None:
                     # If connection data is not created create one :)
                     connection = Connection(token=token)
-                    session.add(connection)
+                    db_session.add(connection)
                 else:
                     # Update token to database if connection data is already created
                     connection.token = token
                     connection.updated_date = datetime.utcnow()
 
-                session.commit()
-                session.close()
+                print(colored("[INFO] JWT token saved to local database.", "green", attrs=["bold"]))
+
+                db_session.commit()
 
                 # Return the token but this one is not important because we will use in database.
                 return token
             else:
-                print("Connection is succesfully but server is not return token.")
+                print(colored("[WARN] Connection is succesfully but server is not return token.", "yellow" ,attrs=["bold"]))
         else:
-            print(f"Error occured : {response.json()}")
+            print(colored(f"[ERR] {response.json()}", "red" ,attrs=["bold"]))
     except Exception as e:
-        print(f"Error occured : {e}")
+        db_session.close()
+        print(colored(f"Error occured : {e}", "red" ,attrs=["bold"]))
