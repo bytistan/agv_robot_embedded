@@ -1,51 +1,65 @@
-from database import engine 
-from sqlalchemy.orm import sessionmaker
+from image_process.qr_code_reader import qr_reader 
+from models import *
 
-from pyzbar.pyzbar import decode
-from .helper import get_destination
+from termcolor import colored
+import traceback
 
 class Scanner:
-    def __init__(self,logger):
-        self.logger = logger
+    def __init__(self):
+        self.data = {
+            "area_name":None,
+            "horizontal_coordinate":None,
+            "vertical_coordinate":None,
+            "processed":False
+        }
 
-    def scan(self,image,destination):
+        self.qr_center_tolerance = 25 
+        self.is_centered = False 
+        self.robot = Robot.filter_one(Robot.id > 0) 
 
+    def save_qr(self,data):
         try:
-            return decode(image) 
-        except Exception as e:
-            self.logger.error(f"Error occured: {e}") 
-
-    def check(self,image,destination,mission):
-
-        try:
-            result = self.scan(image)
-            Session = sessionmaker(bind=engine)
-            session = Session()
- 
-            area_name = scan_result[0].data.encode("utf-8") 
-
-            # If scan result same with the destination area.
-            if area_name == destination.qr_code.area_name:
-                self.logger.info(f"Robot reached the {area_name} destination") 
-                # Update the destination column reached.
-                destination.reached = True
-                session.commit()
-                # Find new destination.
-                destination = get_destination(mission)
-                # If find the new destination it is good.
-                if destination:
-                    session.close()
-                    return destination
-                    self.logger.info("Destination updated.")
-                else:
-                    # If not find new destination this means the mission is over.
-                    self.logger.info("Destination record not found.")
-            else:
-                self.logger.info(f"{area_name} is not the destination area.")
+            is_qr_code = QRCode.filter_one(QRCode.area_name == data.get("area_name"))
+            flag = False if is_qr_code else True 
+                
+            if flag:
+                QRCode.save(
+                    robot_id = self.robot.id,
+                    vertical_coordinate = data.get("vertical_coordinate"),
+                    horizontal_coordinate = data.get("horizontal_coordinate"),
+                    area_name = data.get("area_name")
+                )
 
         except Exception as e:
-            self.logger.error(f"Error occured: {e}") 
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-        finally:
-            if session is not None:
-                session.close()
+    def stop(self):
+        try:
+            self.completed = False
+        except Exception as e:
+            self.completed = False
+
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+
+    def update(self, frame):
+        try:
+            data, is_centered = qr_reader(frame,self.qr_center_tolerance)  
+            if data and self.data.get("area_name") != data.get("area_name"):
+                self.data["area_name"] = data.get("area_name")
+                self.data["vertical_coordinate"] = data.get("vertical_coordinate")
+                self.data["horizontal_coordinate"] = data.get("horizontal_coordinate")
+                self.data["processed"] = False 
+
+            if is_centered in [False,True] and self.is_centered != is_centered:
+                self.is_centered = is_centered
+
+            if (self.data.get("area_name") or self.data.get("horizontal_coordinate") or self.data.get("vertical_coordinate")) and not self.data.get("processed"):
+
+                self.save_qr(data)
+                self.data["processed"] = True  
+                print(colored(f"[INFO] Qr code detected {data.get('area_name')}.", "green", attrs=["bold"]))
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))

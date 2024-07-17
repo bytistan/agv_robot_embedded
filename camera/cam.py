@@ -1,54 +1,70 @@
-# MIT License
-# Copyright (c) 2019 JetsonHacks
-# See license for more details
-
-# Description:
-# This script uses a CSI camera (such as the Raspberry Pi Version 2) 
-# connected to an NVIDIA Jetson Nano Developer Kit using OpenCV.
-# Drivers for the camera and OpenCV are included in the base image.
-
+import pyzed.sl as sl
 import cv2
-import time
+import numpy as np
+from termcolor import colored
 
-try:
-    from  Queue import  Queue
-except ModuleNotFoundError:
-    from  queue import  Queue
-
-import threading
-import signal
-import sys
-
-from .frame_reader import FrameReader
-from .helper import gstreamer_pipeline
-from .previewer import Previewer
-
-class Camera(object):
+class Camera:
     def __init__(self):
-        self.open_camera()
+        self.setup()
 
-        self.frame_reader = FrameReader(self.cap)
-        self.frame_reader.daemon = True
-        self.frame_reader.start()
+    def setup(self):
+        try:
+            """Initialize the ZED camera with specific settings."""
+            self.cam = sl.Camera()
+            self.init_params = sl.InitParameters()
+            self.init_params.camera_resolution = sl.RESOLUTION.HD720  # Set resolution
+            self.init_params.depth_mode = sl.DEPTH_MODE.NONE  # Depth mode is not used
+            self.init_params.camera_fps = 30  # Set the camera frame rate to 30 FPS
+            self.init_params.camera_image_flip = sl.FLIP_MODE.AUTO  # Automatic image flipping
+            self.init_params.coordinate_units = sl.UNIT.METER
 
-        self.previewer = Previewer(self.frame_reader)
+            if self.cam.open(self.init_params) != sl.ERROR_CODE.SUCCESS:
+                print("Failed to start camera")
+                exit(1)
 
-    def open_camera(self):
-        self.cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
-        if not self.cap.isOpened():
-            raise RuntimeError("Failed to open camera!")
+            print(colored(f"[INFO]: Camera successfully launched.", "red", attrs=["bold"]))
+        except Exception as e:
+            self.camera.close()
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def getFrame(self):
-        return self.frame_reader.getFrame()
+    def preview(self,frame):
+        try: 
+            if frame is not None:
+                # Process frame as needed
+                cv2.imshow("Captured Frame", frame)
 
-    def start_preview(self):
-        self.previewer.daemon = True
-        self.previewer.start_preview()
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                return False
+        except Exception as e:
+            self.camera.close()
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def stop_preview(self):
-        self.previewer.stop_preview()
-        self.previewer.join()
-    
+    def capture_frame(self):
+        try:
+            """Capture a single frame from the ZED camera."""
+            image_zed = sl.Mat()
+            runtime_parameters = sl.RuntimeParameters()
+            if self.cam.grab(runtime_parameters) == sl.ERROR_CODE.SUCCESS:
+                # Retrieve the image in grayscale
+                self.cam.retrieve_image(image_zed, sl.VIEW.LEFT_GRAY)  # Or use sl.VIEW.RIGHT_GRAY
+                frame = image_zed.get_data()
+                return frame
+            else:
+                print("Failed to capture image")
+                return None
+        except Exception as e:
+            self.camera.close()
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+
     def close(self):
-        self.frame_reader.stop()
-        self.cap.release()
+        try:
+            """Close the ZED camera."""
+            self.cam.close()
+            cv2.destroyAllWindows()
+        except Exception as e:
+            self.camera.close()
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))

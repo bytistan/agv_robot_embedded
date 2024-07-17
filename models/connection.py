@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from . import Base
+from .base_model import BaseModel 
 
-class Connection(Base):
+class Connection(BaseModel):
     __tablename__ = "connection"
     
     id = Column(Integer, primary_key=True)
@@ -16,8 +16,3 @@ class Connection(Base):
     created_date = Column(DateTime, default=datetime.utcnow)
 
     robot = relationship("Robot", back_populates="connection")
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(**data)
-

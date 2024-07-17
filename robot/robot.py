@@ -1,85 +1,89 @@
-from camera.cam import Camera
-from image_processing.processer import LineFollower
-from image_processing.helper import calculate_center, is_centered
-from engine.robot_movement import RobotMovement
+from camera.cam import Camera 
+from image_process.line_follower import LineFollower 
+from models import *
 
-from database import engine 
-from sqlalchemy.orm import sessionmaker
+from .scanner import Scanner 
+from .direction import Direction
+from .mission import MissionHandler
 
-from .helper import get_location, get_robot, close_mission
+import cv2 
+import time 
+from termcolor import colored
+import threading 
+import traceback
 
-class Robot:
-    def __init__(self,logger,sio):
+class Robot_:
+    def __init__(self):
         self.camera = Camera()
         self.line_follower = LineFollower()
-        self.robot_movement = RobotMovement()
+        self.scanner = Scanner() 
+        
+        self.order = -1  
+        self.direction = Direction()
 
-        # For server connection  
-        self.sio = sio
+        self.data = {
+            "line_status":None,
+        }
+        
+        self.start_time = time.time()
+        self.loop_time = None 
+        self.interval = 1
 
-        # Returns information about the robot.
-        self.logger = logger 
-
-        # Information about the robot is stored in the data variable when the program runs.
-        self.robot = get_robot()
-
-        # Using for odoymetry.
-        self.wheel_perimeter = 0
-
-        # Line tolerance when robot turn.
-        self.tolerance = 20
-
-        # Mission information coming from when robot run function call.
-        self.mission = None
-
-        # destination information.
-        self.destination = None
-
-        # Protocols for compicated mission.
-        self.protocol = []
-
-        # Robot location.
-        self.location = get_location() 
-
-    def odoymetry(self):
-        """
-            Function Explanation : Adds the diameter of the wheel to its position, looking in the direction the robot is traveling. 
-            
-            NOTE: For negative directions, the wheel's age is multiplied by -1.
-        """
+        self.status = {
+            "start_time":time.strftime("%H.%M", time.localtime(self.start_time)),
+            "battery":0,
+            "speed":0,
+            "tempature":0,
+            "load":0,
+            "mission_time":0
+        }
+      
+    def stop(self):
         try:
-            Session = sessionmaker(bind=engine)
-            session = Session()
-
-            value = self.wheel_perimeter
-
-            # If robot going negative direction make value negative.
-            if self.location.direction in [0,2]: 
-               value *= -1 
-                
-            if self.location:
-                if self.location.direction in [0,1]:
-                    # If location is vertical add the wheel perimeter to vertical coordinate.
-                    self.location.vertical_coordinate = self.location.vertical_coordinate + value 
-                elif location.direction in [2,3]:
-                    # If location is horizontal add the wheel perimeter to horizontal coordinate.
-                    self.location.horizontal_coordinate = self.location.horizontal_coordinate + value 
-                session.commit()
-
+            self.camera.close()
+            cv2.destroyAllWindows()
         except Exception as e:
-            self.logger.error(f"Error occured: {e}") 
+            self.camera.close()
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-        finally:
-            if session is not None:
-                session.close()
+    def setup(self, mission):
+        try:
+            self.robot = Robot.filter_one(Robot.id > 0) 
+            self.connection = Connection.filter_one(Connection.id > 0)
 
-    def turn(self):
-        pass
+            self.loop_time = time.time()
+            self.mission_handler = MissionHandler(mission)
+        except Exception as e:
+            self.camera.close()
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def run(self,mission):
+    def run(self, mission):
+        self.setup(mission)
 
-        self.mission = mission
         while True:
-            frame = self.camera.get_frame()
-            line_status = self.line_follower.process(frame)            
+            try:
+                frame = self.camera.capture_frame()
 
+                if frame is None:
+                    print(colored("[WARN] Camera is not working.", "yellow", attrs=["bold"]))
+                    break
+
+                self.scanner.update(frame)  
+
+                self.data["line_status"] = self.line_follower.controller(frame)
+
+                self.mission_handler.update(self.scanner.data)
+
+                if self.mission_handler.complated:
+                    break
+
+            except KeyboardInterrupt:
+                self.camera.close()
+            except Exception as e:
+                self.camera.close()
+                error_details = traceback.format_exc()
+                print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+
+        self.stop() 

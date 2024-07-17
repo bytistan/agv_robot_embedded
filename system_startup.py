@@ -1,21 +1,28 @@
+from network import url 
 from network.api.login import login
+
+from init.init import init_ ,init_default_qr
+from database import engine 
+
+from models import * 
+
+from termcolor import colored
 
 class SystemStartup:
     def __init__(self):
+        self.create_database()
         self.token = login()
 
-    def connect(self):
-        """
-            Function Explanation : It connects to the server and stores the token in a variable for
-            later use. 
-            
-            NOTE: JWT token is used. Token duration 4 hours.
-        """
+    def create_database(self):
         try:
-            sio.connect(url, headers={"Authorization": f"Bearer {token}"})
-            sio.wait()
+            # Create database and insert some information.
+            Base.metadata.create_all(engine)
+
+            init_()
+            init_default_qr()
         except Exception as e:
-            print(f"[-] Error :\nLine Number : 156\n{e}") 
+            print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
+
 
     def update(self):
-        pass 
+        pass
