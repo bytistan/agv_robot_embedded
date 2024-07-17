@@ -1,15 +1,18 @@
-"""
-Vehicle Movement :
-    - 0 : STOP
-    - 1 : FORWARD
-    - 2 : BACKWARD
-    - 3 : RIGHT - 4 : LEFT 
-    - 5 : TURN_RIGHT
-    - 6 : TURN_LEFT
-"""
 import copy 
+import traceback
 
-class LineCenter():
+"""
+Vehicle Movement: 
+    - 0 : Stop, 
+    - 1 : Forward,
+    - 2 : Backward, 
+    - 3 : Right,
+    - 4 : Left,
+    - 5 : Turn Right,
+    - 6 : Turn Left 
+"""
+
+class LineCenter:
     def __init__(self):
         self.data = [ 
             { 
@@ -53,10 +56,14 @@ class LineCenter():
         ]
 
     def line_center(self,ls):
-        for data in self.data:
-            if data.get("fi") == ls:
-                return copy.deepcopy(data.get("protocol"))
-        return None 
+        try:
+            for data in self.data:
+                if data.get("fi") == ls:
+                    return copy.deepcopy(data.get("protocol"))
+            return None 
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
     def update(self,ls):
         return self.line_center(ls)

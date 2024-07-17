@@ -6,6 +6,8 @@ from database import engine
 
 from models import * 
 
+from termcolor import colored
+
 class SystemStartup:
     def __init__(self):
         self.create_database()

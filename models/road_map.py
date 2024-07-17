@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean ,Float
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from . import Base
+from .base_model import BaseModel 
 
-class RoadMap(Base):
+class RoadMap(BaseModel):
     __tablename__ = "road_map"
     
     id = Column(Integer, primary_key=True)

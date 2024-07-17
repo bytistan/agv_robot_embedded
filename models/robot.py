@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from . import Base
+from .base_model import BaseModel 
 
-class Robot(Base):
+class Robot(BaseModel):
     __tablename__ = "robot"
     
     id = Column(Integer, primary_key=True)
