@@ -1,46 +1,70 @@
 import threading
 import time
+import websocket
+import json
 from termcolor import colored
-import socketio
+import traceback
 
-class RaspiClient:
+class esp32Client:
     def __init__(self):
-        self.server_url = "http://192.168.113.215:5001"
-        self.password = "__h0m0l__"
-        self.sio = socketio.Client()
+        self.server_url = "ws://192.168.113.215:5001"
+        self.ws = None
 
-        self.sio.on("connect", self.on_connect)
-        self.sio.on("disconnect", self.on_disconnect)
-        self.sio.on("_235_response", self.on_order_response)
-
-    def send(self, order, speed=None):
-        self.sio.emit("_235", {"order": order, "speed": speed})
+    def send(self, order, speed=0):
+        try:
+            message = f"{order}:{speed}" 
+            self.ws.send(message)
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
     def connect_to_server(self):
         try:
-            self.sio.connect(self.server_url, auth={"password": self.password})
-            # Thread içinde sio.wait() çağrısı
-            t = threading.Thread(target=self.sio.wait)
-            t.start()
-
-            # Ana programı engellememek için kısa bir süre uyku
+            self.ws = websocket.WebSocketApp(self.server_url,
+                                             on_open=self.on_open,
+                                             on_message=self.on_message,
+                                             on_close=self.on_close,
+                                             on_error=self.on_error)
+            wst = threading.Thread(target=self.ws.run_forever)
+            wst.daemon = True
+            wst.start()
+            
             time.sleep(5)
         except KeyboardInterrupt:
-            self.sio.disconnect()
+            self.ws.close()
             print(colored("Bye :)", "yellow", attrs=["bold"]))
         except Exception as e:
             print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
 
-    def on_connect(self):
-        print(colored("[INFO] Connected to engine.", "green", attrs=["bold"]))
+    def on_open(self, ws):
+        try:
+            print(colored("[INFO] Connected to engine.", "green", attrs=["bold"]))
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def on_disconnect(self):
-        print(colored("[WARN] Disconnected from engine.", "yellow", attrs=["bold"]))
+    def on_message(self, ws, message):
+        try:
+            data = json.loads(message)
+            if "status" in data:
+                if 200 <= data["status"] < 300:
+                    print(colored("[INFO] Data was sent successfully.", "green", attrs=["bold"]))
+                else:
+                    print(colored("[WARN] Failed to send data.", "red", attrs=["bold"]))
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def on_order_response(self, data):
-        if 200 <= data.get("status") < 300:
-            print(colored("[INFO] Data was sent successfully.", "green", attrs=["bold"]))
-        else:
-            print(colored("[WARN] Failed to send data.", "red", attrs=["bold"]))
-
-
+    def on_close(self, ws, close_status_code, close_msg):
+        try:
+            print(colored("[WARN] Disconnected from engine.", "yellow", attrs=["bold"]))
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            
+    def on_error(self, ws, error):
+        try:
+            print(colored(f"[ERR] {error}", "red", attrs=["bold"]))
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))

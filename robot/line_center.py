@@ -1,19 +1,20 @@
 import copy 
 import traceback
 
-"""
-Vehicle Movement: 
-    - 0 : Stop, 
-    - 1 : Forward,
-    - 2 : Backward, 
-    - 3 : Right,
-    - 4 : Left,
-    - 5 : Turn Right,
-    - 6 : Turn Left 
-"""
-
 class LineCenter:
     def __init__(self):
+
+        """
+        Vehicle Movement: 
+            - 0 : Stop, 
+            - 1 : Forward,
+            - 2 : Backward, 
+            - 3 : Right,
+            - 4 : Left,
+            - 5 : Turn Right,
+            - 6 : Turn Left 
+        """
+
         self.data = [ 
             { 
                 "fi":[0,3,6],

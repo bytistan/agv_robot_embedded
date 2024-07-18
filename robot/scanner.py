@@ -16,6 +16,7 @@ class Scanner:
         self.qr_center_tolerance = 25 
         self.is_centered = False 
         self.robot = Robot.filter_one(Robot.id > 0) 
+        self.flag = False
 
     def save_qr(self,data):
         try:
@@ -51,6 +52,7 @@ class Scanner:
                 self.data["vertical_coordinate"] = data.get("vertical_coordinate")
                 self.data["horizontal_coordinate"] = data.get("horizontal_coordinate")
                 self.data["processed"] = False 
+                self.flag = True
 
             if is_centered in [False,True] and self.is_centered != is_centered:
                 self.is_centered = is_centered

@@ -3,8 +3,10 @@ from image_process.line_follower import LineFollower
 from models import *
 
 from .scanner import Scanner 
-from .direction import Direction
 from .mission import MissionHandler
+from .location import Location_
+from .direction import Direction
+from .protocol import Protocol
 
 import cv2 
 import time 
@@ -17,9 +19,10 @@ class Robot_:
         self.camera = Camera()
         self.line_follower = LineFollower()
         self.scanner = Scanner() 
-        
-        self.order = -1  
+        self.location = Location_()
         self.direction = Direction()
+
+        self.protocol = Protocol(self.direction, self.location)
 
         self.data = {
             "line_status":None,
@@ -36,12 +39,12 @@ class Robot_:
             "tempature":0,
             "load":0,
             "mission_time":0
+
         }
-      
+
     def stop(self):
         try:
             self.camera.close()
-            cv2.destroyAllWindows()
         except Exception as e:
             self.camera.close()
             error_details = traceback.format_exc()
@@ -68,13 +71,16 @@ class Robot_:
 
                 if frame is None:
                     print(colored("[WARN] Camera is not working.", "yellow", attrs=["bold"]))
-                    break
+                    break   
 
                 self.scanner.update(frame)  
 
                 self.data["line_status"] = self.line_follower.controller(frame)
-
-                self.mission_handler.update(self.scanner.data)
+                
+                self.protocol.update(self.data)
+                
+                if self.scanner.flag:
+                    self.mission_handler.update(self.scanner.data)
 
                 if self.mission_handler.complated:
                     break

@@ -1,9 +1,16 @@
 from .line_center import LineCenter
-from network.engine import RaspiClient 
+from .turner import Turner
+
+from network.engine import esp32Client 
+
 import traceback
+from termcolor import colored
 
 class Protocol:
-    def __init__(self):
+    def __init__(self,direction,location):
+        self.direction = direction
+        self.location = location
+
         self.line_center = LineCenter()
         self.turner = Turner()
 
@@ -11,8 +18,11 @@ class Protocol:
             "line_center":None  
         }  
        
-        self.wheel_engine = RaspiClient()
-        self.wheel_engine.connect_to_server()
+        self.esp32_client = esp32Client()
+        self.esp32_client.connect_to_server()
+
+        self.move = 0
+        self.flag = True
 
     def do_protocol(self, protocol, info, data):
         try:
@@ -20,12 +30,14 @@ class Protocol:
             speed = protocol.get("speed")
             to = protocol.get("to")
 
-            process = self.mode.get(m)[index].get("process")
-
             p_mode, p_index = info.get("mode"),info.get("index")
 
+            process = self.mode.get(p_mode)[index].get("process")
+
             if not process:
-                # self.wheel_engine.send(move,speed)
+                self.move = move
+                self.direction.update(move)
+                # self.esp32_client.send(move,speed)
                 self.mode[p_mode][p_index]["process"] = True 
         except Exception as e:
             error_details = traceback.format_exc()
@@ -34,7 +46,7 @@ class Protocol:
     def check_protocol(self,p_mode,p_index,data):
         try:
             line_status = data.get("line_status")
-
+        
             if to == line_status: # Check the line status
                 self.mode[p_mode][p_index]["completed"] = True
                 self.mode[p_mode][p_index]["process"] = False
@@ -48,23 +60,35 @@ class Protocol:
                 if protocols:
                     for index,protocol in enumerate(protocols):
                         if not protocol.get("completed"):
-                            return protocol,{"mode":m,"index":index}
+                            return (protocol,{"mode":m,"index":index})
 
                     self.mode[m] = None  
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def update(self, protocol, data):
+    def update(self, data):
         try:
-            new_protocol = self.line_center.update(self.data.get("line_status"))
+            if data.get("line_status"):
+                if self.flag:
+                    print(colored(f"[WARN]: No line detected", "yellow", attrs=["bold"]))
+                self.flag = False
+                return
 
-            if new_protocol and not self.mode.get("line_center"):
-                self.mode["line_center"] = new_protocol
+            self.flag = True
+            new_protocols = self.line_center.update(data.get("line_status"))
+
+            if new_protocols and not self.mode.get("line_center"):
+                self.mode["line_center"] = new_protocols
                              
-            protocol,info = self.find_protocol()
+            p_response = self.find_protocol()
             
-            if protocol:
+            if p_response is None:
+                return
+            
+            protocol,info = p_response[0],p_response[1]
+
+            if protocol and info:
                 self.do_protocol(protocol, info, data)
                 self.check_protocol(info, data)
 
