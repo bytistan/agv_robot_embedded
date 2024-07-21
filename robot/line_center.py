@@ -17,38 +17,38 @@ class LineCenter:
 
         self.data = [ 
             { 
-                "fi":[0,3,6],
+                "fi":[0,1,2],
                 "protocol":[
                     {
                         "move": 3,
-                        "speed":25,
-                        "to": [1,4,7],
+                        "speed":225,
+                        "to": [3,4,5],
                         "completed":False,
                         "process":False
                     },
                     {
                         "move": 0,
                         "speed":0,
-                        "to": [1,4,7],
+                        "to": [3,4,5],
                         "completed":False,
                         "process":False
                     } 
                 ]
             }, 
             { 
-                "fi":[2,5,8],
+                "fi":[6,7,8],
                 "protocol":[
                     {
                         "move": 4,
-                        "speed":25,
-                        "to": [1,4,7],
+                        "speed":225,
+                        "to": [3,4,5],
                         "completed":False,
                         "process":False
                     },
                     {
                         "move": 0,
                         "speed":0,
-                        "to": [1,4,7],
+                        "to": [3,4,5],
                         "completed":False,
                         "process":False
                     } 

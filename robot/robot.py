@@ -3,7 +3,6 @@ from image_process.line_follower import LineFollower
 from models import *
 
 from .scanner import Scanner 
-from .mission import MissionHandler
 from .location import Location_
 from .direction import Direction
 from .protocol import Protocol
@@ -11,6 +10,7 @@ from .protocol import Protocol
 import cv2 
 import time 
 from termcolor import colored
+
 import threading 
 import traceback
 
@@ -18,8 +18,8 @@ class Robot_:
     def __init__(self):
         self.camera = Camera()
         self.line_follower = LineFollower()
-        self.scanner = Scanner() 
         self.location = Location_()
+        self.scanner = Scanner(self.location) 
         self.direction = Direction()
 
         self.protocol = Protocol(self.direction, self.location)
@@ -56,7 +56,10 @@ class Robot_:
             self.connection = Connection.filter_one(Connection.id > 0)
 
             self.loop_time = time.time()
-            self.mission_handler = MissionHandler(mission)
+
+            self.protocol.setup(mission)  
+            self.protocol.guidance.setup(mission)
+
         except Exception as e:
             self.camera.close()
             error_details = traceback.format_exc()
@@ -77,13 +80,10 @@ class Robot_:
 
                 self.data["line_status"] = self.line_follower.controller(frame)
                 
-                self.protocol.update(self.data)
-                
-                if self.scanner.flag:
-                    self.mission_handler.update(self.scanner.data)
-
-                if self.mission_handler.complated:
+                if self.protocol.guidance.complated:
                     break
+                
+                self.protocol.update(self.data,self.scanner.data)
 
             except KeyboardInterrupt:
                 self.camera.close()

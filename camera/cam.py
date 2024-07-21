@@ -7,6 +7,22 @@ class Camera:
     def __init__(self):
         self.setup()
 
+    def crop_image_by_percentage(self, image, left_percentage, right_percentage):
+        try:
+            height, width = image.shape[:2]
+            
+            left_crop = int(width * left_percentage / 100)
+            right_crop = int(width * right_percentage / 100)
+            
+            new_width = width - left_crop - right_crop
+            
+            cropped_image = image[:, left_crop:left_crop + new_width]
+            
+            return cropped_image
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+
     def setup(self):
         try:
             """Initialize the ZED camera with specific settings."""
@@ -50,7 +66,8 @@ class Camera:
                 # Retrieve the image in grayscale
                 self.cam.retrieve_image(image_zed, sl.VIEW.LEFT_GRAY)  # Or use sl.VIEW.RIGHT_GRAY
                 frame = image_zed.get_data()
-                return frame
+                f = self.crop_image_by_percentage(frame,10,10)
+                return f 
             else:
                 print("Failed to capture image")
                 return None

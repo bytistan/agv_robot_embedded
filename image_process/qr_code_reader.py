@@ -53,4 +53,3 @@ def qr_reader(img, tolerance):
                     return extract_data, centered
     except Exception as e:
         print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
-
