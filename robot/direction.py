@@ -23,13 +23,13 @@ class Direction:
             self.find_new_direction(rotation)
 
             if rotation is None: 
-                print(colored(f"[WARN]: Rotation is not valid.", "yellow", attrs=["bold"])) 
+                print(colored(f"[WARN] Rotation is not valid.", "yellow", attrs=["bold"])) 
                 return
 
             location = Location.find_one(Location.id > 0) 
 
             if location is None:
-                print(colored(f"[WARN]: Location record not found cannot change direction !", "yellow", attrs=["bold"])) 
+                print(colored(f"[WARN] Location record not found cannot change direction !", "yellow", attrs=["bold"])) 
                 return
             else:
                 Location.update(
@@ -53,7 +53,7 @@ class Direction:
                         self.x = 0
                         self.y = 1
                     else:
-                        print(colored(f"[WARN]: No rotation found.", "yellow", attrs=["bold"]))
+                        print(colored(f"[WARN] No rotation found.", "yellow", attrs=["bold"]))
                          
                 elif self.x == -1:
                     if rotation in [3,5]:
@@ -63,7 +63,7 @@ class Direction:
                         self.x = 0
                         self.y = -1
                     else:
-                        print(colored(f"[WARN]: No rotation found.", "yellow", attrs=["bold"]))
+                        print(colored(f"[WARN] No rotation found.", "yellow", attrs=["bold"]))
 
             elif self.y != 0:
                 if self.y == 1:
@@ -74,7 +74,7 @@ class Direction:
                         self.x = -1 
                         self.y = 0 
                     else:
-                        print(colored(f"[WARN]: No rotation found.", "yellow", attrs=["bold"]))
+                        print(colored(f"[WARN] No rotation found.", "yellow", attrs=["bold"]))
                 elif self.y == -1:
                     if rotation in [3,5]:
                         self.x = -1
@@ -83,13 +83,12 @@ class Direction:
                         self.x = 1 
                         self.y = 0 
                     else:
-                        print(colored(f"[WARN]: No rotation found.", "yellow", attrs=["bold"]))
-            
+                        print(colored(f"[WARN] No rotation found.", "yellow", attrs=["bold"]))
 
             else:
-                print(colored(f"[WARN]: Direction is (0:0).", "yellow", attrs=["bold"]))
+                print(colored(f"[WARN] Direction is [0:0].", "yellow", attrs=["bold"]))
 
-            print(colored(f"[INFO]: New direction : ({self.direction.x}:{self.direction.y})", "green", attrs=["bold"])) 
+            print(colored(f"[INFO] New direction : [({self.direction.x}]:[{self.direction.y}])", "green", attrs=["bold"])) 
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))

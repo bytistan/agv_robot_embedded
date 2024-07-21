@@ -47,6 +47,7 @@ class Protocol:
             if not process:
                 self.move = move
                 self.direction.update(move)
+                print(colored(f"[{p_mode.upper()}]: {move}", "green", attrs=["bold"]))
                 # self.esp32_client.send(move,speed)
                 self.mode[p_mode][p_index]["process"] = True 
         except Exception as e:
@@ -77,20 +78,28 @@ class Protocol:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def go_target(self,line_status,scan_data):
+    def go_target(self,data,scan_data):
         try:
-            d = self.guidance.update(self.direction,data,scan_data)
+            d = self.guidance.update(self.direction,scan_data)
+             
+            turn = self.turner.update(data.get("line_status"))
             
-            turn = self.turner.update(line_status)
-            
+            if turn:
+                self.mode["turn"] = turn
+                return
+
             if d is None or len(d) < 2:
                 return 
            
-            horizontal_ok = d[0]
-            vertical_ok = d[1]
+            direction_x = d.get("x")
+            direction_y = d.get("y")
 
-            if turn and (horizontal_ok or vertical_ok):
-                self.mode["turn"] = turn
+            if self.direction.x != 0:
+                pass
+                # self.esp32_client.send(move,speed)
+            if self.direction.y != 0:
+                pass
+                # self.esp32_client.send(move,speed)
 
         except Exception as e:
             error_details = traceback.format_exc()
@@ -111,17 +120,14 @@ class Protocol:
                 self.mode["line_center"] = new_protocols
                              
             p_response = self.find_protocol()
-            
-            if p_response is None:
-                return
-            
-            protocol,info = p_response[0],p_response[1]
 
-            if protocol and info:
+            if p_response is not None and len(p_response) > 1:
+                protocol,info = p_response[0],p_response[1]
+
                 self.do_protocol(protocol, info, data)
                 self.check_protocol(info, data)
             else:
-                self.go_target(line_status, scan_data)
+                self.go_target(data,scan_data)
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))

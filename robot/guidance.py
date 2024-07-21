@@ -1,6 +1,7 @@
 from models import * 
 
 from termcolor import colored
+import traceback
 from datetime import datetime 
 
 class Guidance:
@@ -39,7 +40,7 @@ class Guidance:
 
             if not qr_code:
                 print(colored(f"[WARN] Qr code not found {road_map.qr_code_id}.", "yellow", attrs=["bold"]))
-            print(colored(f"[INFO]:[TARGET] {qr_code.area_name} [COR]:[{qr_code.horizontal_coordinate}]:[{qr_code.vertical_coordinate}]", "green", attrs=["bold"]))
+            print(colored(f"[INFO] [TARGET]:[{qr_code.area_name}] - [COR]:[{qr_code.horizontal_coordinate}]:[{qr_code.vertical_coordinate}]", "green", attrs=["bold"]))
 
             return {"road_map":r,"qr_code":qr_code}
         except Exception as e:
@@ -65,34 +66,50 @@ class Guidance:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def update(self, direction, data):
+    def update(self, direction, scan_data):
         try:
             if self.complated:
                 return 
 
-            self.reached(data)
+            self.reached(scan_data)
             
             location = Location.filter_one(Location.id > 0) 
 
-            cor_x = self.destination.get("horizontal_coodinate")
-            cor_y = self.destination.get("vertical_coordinate")
+            cor_x = self.destination_qr.horizontal_coordinate
+            cor_y = self.destination_qr.vertical_coordinate
             
-            rob_x = location.horizontal_coodinate 
+            rob_x = location.horizontal_coordinate 
             rob_y = location.vertical_coordinate 
-           
+
             target_vertical = 1 if cor_y > rob_y else -1 
             target_horizontal = 1 if cor_x > rob_x > 0 else -1 
             
             destination_x = False
             destination_y = False
 
-            if rob_x - self.tolerance < cor_x < rob_x + self.tolerance:
+            if (rob_x - self.tolerance) < cor_x < (rob_x + self.tolerance):
                 destination_x = True 
             
-            if rob_y - self.tolerance < cor_y < rob_y + self.tolerance:
+            if (rob_y - self.tolerance) < cor_y < (rob_y + self.tolerance):
                 destination_y = True
-            
-            return (destination_x,destination_y)
+
+            if destination_x:
+                return {
+                            "x":0,
+                            "y":target_vertical
+                        }
+
+            elif destination_y:
+                return {
+                            "x":target_horizontal,
+                            "y":0
+                        }
+            else:
+                return {
+                            "x":0 if direction.x != 0 else target_horizontal,
+                            "y":0 if direction.y != 0 else target_vertical 
+                        }
+
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))

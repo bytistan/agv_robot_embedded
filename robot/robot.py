@@ -5,7 +5,7 @@ from models import *
 from .scanner import Scanner 
 from .location import Location_
 from .direction import Direction
-from .protocol import Protocol
+from .protocol import Protocol 
 
 import cv2 
 import time 
@@ -39,7 +39,6 @@ class Robot_:
             "tempature":0,
             "load":0,
             "mission_time":0
-
         }
 
     def stop(self):
@@ -83,13 +82,15 @@ class Robot_:
                 if self.protocol.guidance.complated:
                     break
                 
-                self.protocol.update(self.data,self.scanner.data)
+                self.protocol.update(self.data, self.scanner.data)
 
             except KeyboardInterrupt:
                 self.camera.close()
+                break 
             except Exception as e:
                 self.camera.close()
                 error_details = traceback.format_exc()
                 print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+                break
 
         self.stop() 

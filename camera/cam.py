@@ -38,7 +38,7 @@ class Camera:
                 print("Failed to start camera")
                 exit(1)
 
-            print(colored(f"[INFO]: Camera successfully launched.", "red", attrs=["bold"]))
+            print(colored(f"[INFO] Camera successfully launched.", "green", attrs=["bold"]))
         except Exception as e:
             self.camera.close()
             error_details = traceback.format_exc()

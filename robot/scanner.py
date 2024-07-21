@@ -63,7 +63,7 @@ class Scanner:
 
                 self.save_qr(data)
                 self.data["processed"] = True  
-                print(colored(f"[INFO] Qr code detected [{data.get('area_name')}]:[{data.get('horizontal_coordinate')}]:[{data.get('vertical_coordinate')].", "green", attrs=["bold"]))
+                print(colored(f"[INFO] Qr code detected [{data.get('area_name')}]:[{data.get('horizontal_coordinate')}]:[{data.get('vertical_coordinate')}].", "green", attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
