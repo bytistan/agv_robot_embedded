@@ -47,7 +47,7 @@ class Protocol:
             if not process:
                 self.move = move
                 self.direction.update(move)
-                print(colored(f"[{p_mode.upper()}]: {move}", "green", attrs=["bold"]))
+                print(colored(f"[{p_mode.upper()}]:[{move}]", "green", attrs=["bold"]))
                 # self.esp32_client.send(move,speed)
                 self.mode[p_mode][p_index]["process"] = True 
         except Exception as e:
@@ -89,10 +89,12 @@ class Protocol:
                 return
 
             if d is None or len(d) < 2:
-                return 
+                return
            
             direction_x = d.get("x")
             direction_y = d.get("y")
+
+            print(colored(f"[INFO] [{direction_x},{direction_y}]", "green", attrs=["bold"]))
 
             if self.direction.x != 0:
                 pass

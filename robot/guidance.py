@@ -82,7 +82,7 @@ class Guidance:
             rob_y = location.vertical_coordinate 
 
             target_vertical = 1 if cor_y > rob_y else -1 
-            target_horizontal = 1 if cor_x > rob_x > 0 else -1 
+            target_horizontal = 1 if cor_x > rob_x else -1 
             
             destination_x = False
             destination_y = False
