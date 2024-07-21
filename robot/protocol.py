@@ -7,6 +7,8 @@ from network.engine import esp32Client
 import traceback
 from termcolor import colored
 
+from .odoymetry import LinearOdometry
+
 class Protocol:
     def __init__(self, direction, location):
         self.direction = direction
@@ -15,6 +17,7 @@ class Protocol:
         self.line_center = LineCenter()
         self.turner = Turner()
         self.guidance = Guidance()
+        self.linear_odoymetry = LinearOdometry()
 
         self.mode = {
             "turn":None,
@@ -26,6 +29,7 @@ class Protocol:
 
         self.move = 0
         self.flag = True
+        self.speed = 0
 
     def setup(self,mission):
         try:
@@ -78,7 +82,7 @@ class Protocol:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def go_target(self,data,scan_data):
+    def go_target(self, data, scan_data):
         try:
             d = self.guidance.update(self.direction,scan_data)
              
@@ -86,6 +90,7 @@ class Protocol:
             
             if turn:
                 self.mode["turn"] = turn
+                self.linear_odoymetry.reset()
                 return
 
             if d is None or len(d) < 2:
@@ -94,7 +99,7 @@ class Protocol:
             direction_x = d.get("x")
             direction_y = d.get("y")
 
-            print(colored(f"[INFO] [{direction_x},{direction_y}]", "green", attrs=["bold"]))
+            print(colored(f"[INFO] [{direction_x}]:[{direction_y}]", "green", attrs=["bold"]))
 
             if self.direction.x != 0:
                 pass
@@ -109,11 +114,14 @@ class Protocol:
 
     def update(self, data, scan_data):
         try:
+            if self.mode.get("turn") is None:
+                self.linear_odoymetry.update(self.speed,self.direction)
+            
             if data.get("line_status") is None:
                 if self.flag:
                     print(colored(f"[WARN]: No line detected", "yellow", attrs=["bold"]))
                 self.flag = False
-                return 
+                return
 
             self.flag = True
             new_protocols = self.line_center.update(data.get("line_status"))

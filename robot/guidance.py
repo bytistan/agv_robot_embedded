@@ -47,21 +47,20 @@ class Guidance:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def reached(self,data):
+    def reached(self):
         try: 
-            if data.get("area_name") == self.destination_qr.area_name:
-                print(colored(f"[INFO] Reached {data.get('area_name')}", "green", attrs=["bold"]))
-                RoadMap.update(self.road_map.id,reached=True)
+            print(colored(f"[INFO] Reached {data.get('area_name')}", "green", attrs=["bold"]))
+            RoadMap.update(self.road_map.id,reached=True)
 
-                info = self.find_destination()
-                
-                if info is None:
-                    print(colored(f"[INFO] Mission complated.", "green", attrs=["bold"]))
-                    self.complated = True
-                    Mission.update(self.mission.id,complated=True,end_time=datetime.now())
-                else:
-                    self.road_map = info.get("road_map") 
-                    self.destination_qr = info.get("qr_code") 
+            info = self.find_destination()
+            
+            if info is None:
+                print(colored(f"[INFO] Mission complated.", "green", attrs=["bold"]))
+                self.complated = True
+                Mission.update(self.mission.id,complated=True,end_time=datetime.now())
+            else:
+                self.road_map = info.get("road_map") 
+                self.destination_qr = info.get("qr_code") 
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
@@ -70,8 +69,6 @@ class Guidance:
         try:
             if self.complated:
                 return 
-
-            self.reached(scan_data)
             
             location = Location.filter_one(Location.id > 0) 
 
@@ -86,6 +83,9 @@ class Guidance:
             
             destination_x = False
             destination_y = False
+            
+            if destination_x and destination_y:
+                self.reached()
 
             if (rob_x - self.tolerance) < cor_x < (rob_x + self.tolerance):
                 destination_x = True 
