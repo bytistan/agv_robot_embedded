@@ -4,9 +4,11 @@ from termcolor import colored
 import traceback
 from datetime import datetime 
 
+from .direction import Direction 
+
 class Guidance:
     def __init__(self):
-        self.tolerance = 10 
+        self.tolerance = 100
         self.complated = False 
 
     def setup(self,mission):
@@ -17,7 +19,7 @@ class Guidance:
 
             self.road_map = data.get("road_map")
             self.destination_qr = data.get("qr_code")
-
+            
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
@@ -92,23 +94,23 @@ class Guidance:
             
             if (rob_y - self.tolerance) < cor_y < (rob_y + self.tolerance):
                 destination_y = True
+        
+            new_x = 0
+            new_y = 0
 
             if destination_x:
-                return {
-                            "x":0,
-                            "y":target_vertical
-                        }
+                new_x = 0
+                new_y = target_vertical
 
             elif destination_y:
-                return {
-                            "x":target_horizontal,
-                            "y":0
-                        }
+                new_x = target_horizontal 
+                new_y = 0 
+
             else:
-                return {
-                            "x":0 if direction.x != 0 else target_horizontal,
-                            "y":0 if direction.y != 0 else target_vertical 
-                        }
+                new_x = 0 if direction.x != 0 else target_horizontal 
+                new_y = 0 if direction.y != 0 else target_vertical 
+            
+            return Direction(x=new_x,y=new_y)
 
         except Exception as e:
             error_details = traceback.format_exc()

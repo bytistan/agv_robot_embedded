@@ -20,7 +20,7 @@ class Robot_:
         self.line_follower = LineFollower()
         self.location = Location_()
         self.scanner = Scanner(self.location) 
-        self.direction = Direction()
+        self.direction = Direction(y=-1)
 
         self.protocol = Protocol(self.direction, self.location)
 
@@ -35,7 +35,7 @@ class Robot_:
         self.status = {
             "start_time":time.strftime("%H.%M", time.localtime(self.start_time)),
             "battery":0,
-            "speed":0,
+            "speed":15.7,
             "tempature":0,
             "load":0,
             "mission_time":0
@@ -75,9 +75,8 @@ class Robot_:
                     print(colored("[WARN] Camera is not working.", "yellow", attrs=["bold"]))
                     break   
 
-                self.scanner.update(frame)  
-
-                self.data["line_status"] = self.line_follower.controller(frame)
+                self.data["line_status"] = self.line_follower.update(frame)
+                self.scanner.scan(frame)  
                 
                 if self.protocol.guidance.complated:
                     break

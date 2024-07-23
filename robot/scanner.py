@@ -3,6 +3,7 @@ from models import *
 
 from termcolor import colored
 import traceback
+import threading
 
 class Scanner:
     def __init__(self,location):
@@ -44,6 +45,14 @@ class Scanner:
         except Exception as e:
             self.completed = False
 
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+
+    def scan(self,frame):
+        try:
+            scanner_thread = threading.Thread(target=self.update, args=(frame,))
+            scanner_thread.start()
+        except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 

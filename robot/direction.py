@@ -1,6 +1,8 @@
 from termcolor import colored
 import traceback
 
+from models import *
+
 class Direction:
     def __init__(self,x=0,y=0): 
 
@@ -26,7 +28,7 @@ class Direction:
                 print(colored(f"[WARN] Rotation is not valid.", "yellow", attrs=["bold"])) 
                 return
 
-            location = Location.find_one(Location.id > 0) 
+            location = Location.filter_one(Location.id > 0) 
 
             if location is None:
                 print(colored(f"[WARN] Location record not found cannot change direction !", "yellow", attrs=["bold"])) 
@@ -34,8 +36,8 @@ class Direction:
             else:
                 Location.update(
                     location.id,
-                    direction_x = self.direction.x,
-                    direction_y = self.direction.y
+                    direction_x = self.x,
+                    direction_y = self.y
                 )
 
         except Exception as e:
@@ -88,7 +90,7 @@ class Direction:
             else:
                 print(colored(f"[WARN] Direction is [0:0].", "yellow", attrs=["bold"]))
 
-            print(colored(f"[INFO] New direction : [({self.direction.x}]:[{self.direction.y}])", "green", attrs=["bold"])) 
+            print(colored(f"[INFO] New direction [{self.x}]:[{self.y}]", "green", attrs=["bold"])) 
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))

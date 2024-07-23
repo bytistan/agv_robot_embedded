@@ -7,7 +7,7 @@ import traceback
 
 class esp32Client:
     def __init__(self):
-        self.server_url = "ws://192.168.113.215:5001"
+        self.server_url = "ws://192.168.137.6:5000"
         self.ws = None
 
     def send(self, order, speed=0):
