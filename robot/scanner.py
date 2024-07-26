@@ -3,15 +3,18 @@ from models import *
 
 from termcolor import colored
 import traceback
+import threading
 
 class Scanner:
-    def __init__(self):
+    def __init__(self,location):
         self.data = {
             "area_name":None,
             "horizontal_coordinate":None,
             "vertical_coordinate":None,
             "processed":False
         }
+        
+        self.location = location 
 
         self.qr_center_tolerance = 25 
         self.is_centered = False 
@@ -21,9 +24,11 @@ class Scanner:
         try:
             is_qr_code = QRCode.filter_one(QRCode.area_name == data.get("area_name"))
             flag = False if is_qr_code else True 
-                
+
+            self.location.update(data)
+
             if flag:
-                QRCode.save(
+                QRCode.create(
                     robot_id = self.robot.id,
                     vertical_coordinate = data.get("vertical_coordinate"),
                     horizontal_coordinate = data.get("horizontal_coordinate"),
@@ -43,6 +48,14 @@ class Scanner:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
+    def scan(self,frame):
+        try:
+            scanner_thread = threading.Thread(target=self.update, args=(frame,))
+            scanner_thread.start()
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+
     def update(self, frame):
         try:
             data, is_centered = qr_reader(frame,self.qr_center_tolerance)  
@@ -59,7 +72,7 @@ class Scanner:
 
                 self.save_qr(data)
                 self.data["processed"] = True  
-                print(colored(f"[INFO] Qr code detected {data.get('area_name')}.", "green", attrs=["bold"]))
+                print(colored(f"[INFO] Qr code detected [{data.get('area_name')}]:[{data.get('horizontal_coordinate')}]:[{data.get('vertical_coordinate')}].", "green", attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))

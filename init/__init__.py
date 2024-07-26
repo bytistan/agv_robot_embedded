@@ -1,52 +1,52 @@
 DEFAULT_QR = [
         {
             "area_name":"S1",
-            "vertical_coordinate":0,
-            "horizontal_coordinate":0
+            "horizontal_coordinate":8000.0,
+            "vertical_coordinate":12500.0
         },
         {
             "area_name":"S2",
-            "vertical_coordinate":0,
-            "horizontal_coordinate":0
+            "horizontal_coordinate":8000.0,
+            "vertical_coordinate":0.0
         },
         {
             "area_name":"A",
-            "vertical_coordinate":0,
-            "horizontal_coordinate":0
+            "horizontal_coordinate":13250.0,
+            "vertical_coordinate":6250.0
         },
         {
             "area_name":"B",
-            "vertical_coordinate":0,
-            "horizontal_coordinate":0
+            "horizontal_coordinate":10625.0,
+            "vertical_coordinate":6250.0,
         },
         {
             "area_name":"C",
-            "vertical_coordinate":0,
-            "horizontal_coordinate":0
+            "horizontal_coordinate":5375.0,
+            "vertical_coordinate":6250.0
         },
         {
             "area_name":"D",
-            "vertical_coordinate":0,
-            "horizontal_coordinate":0
+            "horizontal_coordinate":2750.0,
+            "vertical_coordinate":6250.0
         },
         {
             "area_name":"1",
-            "vertical_coordinate":0,
-            "horizontal_coordinate":0
+            "horizontal_coordinate":0,
+            "vertical_coordinate":0
         },
         {
             "area_name":"2",
-            "vertical_coordinate":0,
-            "horizontal_coordinate":0
+            "horizontal_coordinate":0,
+            "vertical_coordinate":12500.0
         },
         {
             "area_name":"3",
-            "vertical_coordinate":0,
-            "horizontal_coordinate":0
+            "horizontal_coordinate":16000.0,
+            "vertical_coordinate":12500.0
         },
         {
             "area_name":"4",
-            "vertical_coordinate":0,
-            "horizontal_coordinate":0
+            "horizontal_coordinate":16000.0,
+            "vertical_coordinate":0
         }
 ]
