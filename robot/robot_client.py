@@ -30,21 +30,21 @@ class RobotClient:
             print(colored("[INFO] Successfully connected to the server.", "green" ,attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def connect_error(self, data):
         try:
             print(colored("[INFO] Failed to connect to the server.", "yellow" ,attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def disconnect(self):
         try:
             print(colored("[INFO] Disconnected from the server.", "yellow" ,attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def quit(self):
         try:
@@ -52,7 +52,7 @@ class RobotClient:
             print(colored("[INFO] Successfully quit from the server.", "green" ,attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[ERR] {e}\n[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[ERR] {e}\n[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def handle_mission(self, data):
         try:
@@ -85,7 +85,7 @@ class RobotClient:
             self.robot.run(mission)
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def handle_camera(self, data):
         try:
@@ -95,7 +95,7 @@ class RobotClient:
                 print(colored(f"[WARN] Not connect to do server.\n[WARN] Status code : {data.get('status')}", "yellow", attrs=["bold"])) 
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def handle_robot_connection(self, data):
         try:
@@ -105,7 +105,7 @@ class RobotClient:
                 print(colored(f"[WARN] Not connect to do server.\n[WARN] Status code : {data.get('status')}", "yellow", attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def start(self, server_url):
         try:
@@ -115,4 +115,4 @@ class RobotClient:
             print(colored("[WARN] Connection forcibly closed.", "yellow" ,attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

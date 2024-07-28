@@ -2,37 +2,21 @@ import cv2
 import numpy as np
 import time 
 
-class LineFollower():
+import traceback
+from termcolor import colored
+
+class LineFollower:
     def __init__(self):
         self.data = { 
             0 : (0,0),
             1 : (1,0),
-            2 : (2,0),
-
+            2 : (2,0), 
             3 : (0,1),
             4 : (1,1),
             5 : (2,1),
 
             6 : (0,2),
             7 : (1,2),
-            8 : (2,2)
-        }
-
-        self.imp = {
-            1 : (1,0),
-
-            3 : (0,1),
-            # 4 : (1,1),
-            5 : (2,1),
-
-            7 : (1,2)
-        }
-
-        self.les = {
-            0 : (0,0),
-            2 : (2,0),
-
-            6 : (0,2),
             8 : (2,2)
         }
 
@@ -69,19 +53,14 @@ class LineFollower():
 
             h, w = height // 3, (width - distance) // 3
 
-            data = [] 
+            data = {} 
             
-            for region_number,cor in self.imp.items():
+            for region_number,cor in self.data.items():
                 black_ratio_percent = self.process(gray_image,w,h,cor[0],cor[1],distance)
-                if black_ratio_percent > 50:
-                    data.append(region_number)    
-
-            for region_number,cor in self.les.items():
-                black_ratio_percent = self.process(gray_image,w,h,cor[0],cor[1],distance,1)
-                if black_ratio_percent > 10:
-                    data.append(region_number)    
-
-            return sorted(data)
+                data[region_number] = black_ratio_percent     
+                data[region_number] = black_ratio_percent    
+              
+            return data
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

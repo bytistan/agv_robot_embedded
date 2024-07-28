@@ -23,7 +23,7 @@ class LinearOdometry:
 
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def update_location(self, direction, distance_traveled):
         try:
@@ -46,7 +46,7 @@ class LinearOdometry:
 
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
         
     def reset(self):
         try:
@@ -54,11 +54,11 @@ class LinearOdometry:
             self.last_time = time.time()
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def get_total_distance(self):
         try:
             return self.distance
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

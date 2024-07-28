@@ -22,7 +22,8 @@ def is_qr_code_centered(bbox, img, tolerance):
         else:
             return False
     except Exception as e:
-        print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
+        error_details = traceback.format_exc()
+        print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
 def split_qr(data):
     try:
@@ -34,7 +35,8 @@ def split_qr(data):
                 "vertical_coordinate": new_data[2]
             }
     except Exception as e:
-        print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
+        error_details = traceback.format_exc()
+        print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
 def qr_reader(img, tolerance):
     try:
@@ -52,4 +54,5 @@ def qr_reader(img, tolerance):
                     centered = is_qr_code_centered(bbox, img, tolerance)
                     return extract_data, centered
     except Exception as e:
-        print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
+        error_details = traceback.format_exc()
+        print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

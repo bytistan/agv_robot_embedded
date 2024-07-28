@@ -22,14 +22,14 @@ class Location_:
             self.location = location
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
         
     def odometry(self):
         try:
             pass  
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def update(self,data):
         try:
@@ -58,4 +58,4 @@ class Location_:
 
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

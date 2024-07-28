@@ -37,7 +37,7 @@ class Scanner:
 
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def stop(self):
         try:
@@ -46,7 +46,7 @@ class Scanner:
             self.completed = False
 
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def scan(self,frame):
         try:
@@ -54,7 +54,7 @@ class Scanner:
             scanner_thread.start()
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def update(self, frame):
         try:
@@ -75,4 +75,4 @@ class Scanner:
                 print(colored(f"[INFO] Qr code detected [{data.get('area_name')}]:[{data.get('horizontal_coordinate')}]:[{data.get('vertical_coordinate')}].", "green", attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

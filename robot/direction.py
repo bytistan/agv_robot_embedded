@@ -42,7 +42,7 @@ class Direction:
 
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def find_new_direction(self,rotation):
         try: 
@@ -93,5 +93,4 @@ class Direction:
             print(colored(f"[INFO] New direction [{self.x}]:[{self.y}]", "green", attrs=["bold"])) 
         except Exception as e:
             error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
-
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

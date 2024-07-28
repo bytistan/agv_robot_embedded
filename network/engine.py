@@ -5,9 +5,9 @@ import json
 from termcolor import colored
 import traceback
 
-class esp32Client:
+class Esp32Client:
     def __init__(self):
-        self.server_url = "ws://192.168.137.6:5000"
+        self.server_url = "ws://192.168.137.119:5000"
         self.ws = None
 
     def send(self, order, speed=0):
