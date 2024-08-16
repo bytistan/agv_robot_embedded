@@ -2,6 +2,7 @@ from helper.json_helper import read_json
 
 from .do import Protocol
 from .handler import ProtocolHandler
+from .controller import ProtocolController
 
 import traceback
 from termcolor import colored
@@ -16,39 +17,37 @@ class ProtocolCreator:
             ls = d.get("line_status")
 
             if not ls:
-                print(colored(f"[INFO] Line status not found.", "green", attrs=["bold"]))
-                return 
+                print(colored("[INFO] Line status not found.", "green", attrs=["bold"]))
+                return None, None
 
-            for data in self.data:
-                protocol = data.get("protocol")
-                name = data.get("name")
-                fi = data.get("fi")
+            for entry in self.data:
+                fi = entry.get("fi") 
+                protocol = entry.get("protocol")
+                name = entry.get("name")
+                
+                flag = True
 
                 for fi_key,fi_item in fi.items():
-                    flag = True
+                    per = fi_item[0]
+                    state = fi_item[1]
 
-                    if ls.get(int(fi_key)) > fi_item:
+                    if state == 1 and per > ls.get(int(fi_key)):
                         flag = False
+                    if state == 0 and per < ls.get(int(fi_key)): 
+                        flag = False
+                if flag:
+                    return name,protocol
                     
-                    if flag:
-                        return name,protocol 
-            return None, None 
-        
+            return None, None
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def create_to(self,to):
         try:
-            return lambda data: {
-                key: (
-                    isinstance(item, dict) and any(sub_value == to.get(key, float('-inf')) or sub_value > to.get(key, float('-inf')) for sub_key, sub_value in item.items())
-                    or 
-                    (not isinstance(item, dict) and (item == to.get(key, float('-inf')) or item > to.get(key, float('-inf'))))
-                )
-                for key, item in data.items()
-            }
-                    
+            protocol_controller = ProtocolController(to)
+
+            return protocol_controller
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

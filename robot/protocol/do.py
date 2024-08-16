@@ -3,29 +3,25 @@ from termcolor import colored
 import time 
 
 class Protocol:
-    def __init__(self, move, speed, to, esp32_client):
+    def __init__(self, move, speed, protocol_controller, esp32_client):
         self.completed = False
         self.process = False
         
         self.move = move
         self.speed = speed
-        self.to = to
+        self.protocol_controller = protocol_controller
 
-        self.current_time = time.time()
+        self.esp32_client = esp32_client
 
-    def controller(self,data):
+    def controller(self, data):
         try:
-            result = self.to(data)
-            flag = True
+            result = self.protocol_controller.update(data)
 
-            for key,item in result.items():
-                if item:
-                    flag = False
+            if result:
+                print(colored(f"[INFO] Protocol step completed.", "green", attrs=["bold"]))
+                self.completed = True
+                self.process = False 
 
-            if flag:
-                self.process = False
-                self.complated = True
-                
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
@@ -34,16 +30,17 @@ class Protocol:
         try:
             if not self.process:
                 print(colored(f"[MOVE]:[{self.move}]", "yellow", attrs=["bold"]))
-                # self.esp32_client.send(f"{self.move}:{self.speed}")
+                self.esp32_client.send(self.move)
                 self.process = True 
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def update(self,data):
+    def update(self, data):
         try:
-            if not self.completed:
+            if not self.process and not self.completed:
                 self.do()
+            if not self.completed:
                 self.controller(data)
         except Exception as e:
             error_details = traceback.format_exc()

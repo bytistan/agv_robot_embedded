@@ -3,6 +3,9 @@ from sqlalchemy.sql import and_
 
 from . import * 
 
+from termcolor import colored
+import traceback
+
 class CRUDService:
     def __init__(self, db_session: Session, model):
         self.db_session = db_session
@@ -14,10 +17,9 @@ class CRUDService:
             self.db_session.add(instance)
             self.db_session.commit()
             return instance
-        except SQLAlchemyError as e:
-            self.db_session.rollback()
-            print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
-            return None
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def read(self, instance_id: int):
         try:
@@ -25,9 +27,9 @@ class CRUDService:
             if instance is None:
                 print(colored(f"[WARN] Instance with id {instance_id} not found.", "yellow", attrs=["bold"]))
             return instance
-        except SQLAlchemyError as e:
-            print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
-            return None
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def update(self, instance_id: int, **kwargs):
         try:
@@ -41,10 +43,9 @@ class CRUDService:
 
             self.db_session.commit()
             return instance
-        except SQLAlchemyError as e:
-            self.db_session.rollback()
-            print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
-            return None
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def delete(self, instance_id: int):
         try:
@@ -56,23 +57,22 @@ class CRUDService:
             self.db_session.delete(instance)
             self.db_session.commit()
             return True
-        except SQLAlchemyError as e:
-            self.db_session.rollback()
-            print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
-            return False
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def filter(self, *criterion):
         try:
             query = self.db_session.query(self.model).filter(and_(*criterion))
             return query.all()
-        except SQLAlchemyError as e:
-            print(colored(f"[ERR] {e} -> [HELPER]:[FILTER]", "red", attrs=["bold"]))
-            return None
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def filter_one(self, *criterion):
         try:
             query = self.db_session.query(self.model).filter(and_(*criterion))
             return query.first()
-        except SQLAlchemyError as e:
-            print(colored(f"[ERR] {e} -> [HELPER]:[FILTER_ONE]", "red", attrs=["bold"]))
-            return None
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

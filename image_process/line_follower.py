@@ -20,7 +20,7 @@ class LineFollower:
             8 : (2,2)
         }
 
-    def process(self, gray_image, w, h, col, row, distance, center_ratio=0.50):
+    def process(self, gray_image, w, h, col, row, distance, center_ratio=1):
         try:
             y_start, y_end = row * h, (row + 1) * h
             x_start, x_end = col * w + distance // 2, (col + 1) * w + distance // 2 
@@ -45,9 +45,9 @@ class LineFollower:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def update(self,gray_image): 
+    def update(self,gray_frame): 
         try:
-            height, width = gray_image.shape
+            height, width = gray_frame.shape
 
             distance = width - height
 
@@ -56,7 +56,7 @@ class LineFollower:
             data = {} 
             
             for region_number,cor in self.data.items():
-                black_ratio_percent = self.process(gray_image,w,h,cor[0],cor[1],distance)
+                black_ratio_percent = self.process(gray_frame,w,h,cor[0],cor[1],distance)
                 data[region_number] = black_ratio_percent     
                 data[region_number] = black_ratio_percent    
               

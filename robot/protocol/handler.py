@@ -21,7 +21,7 @@ class ProtocolHandler:
             if len(self.protocols) > 0:
                 if self.protocols[0].completed:
                     del self.protocols[0]
-            else:
+            if len(self.protocols) == 0:
                 self.completed = True
 
         except Exception as e:
@@ -36,7 +36,7 @@ class ProtocolHandler:
                 protocol = self.protocols[0]
                 ls = data.get("line_status")
                 protocol.update(ls)
-
+            
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

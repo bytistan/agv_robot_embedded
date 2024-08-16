@@ -1,12 +1,9 @@
 from camera.cam import Camera 
 from image_process.line_follower import LineFollower 
-from network.engine import Esp32Client
 from models import *
 
-from .scanner import Scanner 
-from .location import Location_
-from .direction import Direction
 from .protocol.create import ProtocolCreator
+from .network.engine import Esp32Client
 
 import cv2 
 import time 
@@ -21,14 +18,11 @@ class Robot_:
         self.esp2_client = Esp32Client()
 
         self.line_follower = LineFollower()
-        self.location = Location_()
-        self.scanner = Scanner(self.location) 
         self.protocol_creator = ProtocolCreator()
-
-        self.direction = Direction(y=-1)
+        self.location_ = Location()
 
         self.data = {
-            "line_status":None,
+            "line_status":None
         }
         
         self.start_time = time.time()
@@ -84,8 +78,9 @@ class Robot_:
                 tmp_imp_num = self.mode_imp.get(tmp_mode)
                 mode_imp_num = self.mode_imp.get(mode)
 
-                if tmp_imp_num > mode_imp_num:
+                if tmp_imp_num > mode_imp_num and protocol_handler:
                     mode = tmp_mode
+
             return mode 
         except:
             error_details = traceback.format_exc()
@@ -99,15 +94,20 @@ class Robot_:
                 frame = self.camera.capture_frame()
 
                 self.data["line_status"] = self.line_follower.update(frame)
-
                 m,protocol = self.protocol_creator.control(self.data)
 
-                self.mode[m] = self.protocol_creator.create(protocol,self.esp2_client) 
+                if self.mode.get(m) is None and protocol is not None:
+                    self.mode[m] = self.protocol_creator.create(protocol,self.esp2_client) 
                 
                 fm = self.find_mode()
-                
-                if fm is not None:
-                    self.mode[fm].update(self.data)  
+
+                protocol_handler = self.mode.get(fm) 
+
+                if fm is not None and protocol_handler is not None:
+                    protocol_handler.update(self.data)  
+                    
+                    if protocol_handler.completed:
+                        self.mode[fm] = None
 
                 if frame is None:
                     print(colored("[WARN] Camera is not working.", "yellow", attrs=["bold"]))

@@ -1,4 +1,4 @@
-from robot.robot_client import RobotClient
+from robot.network.robot_client import RobotClient
 
 from network import url, auth_data 
 from system_startup import SystemStartup

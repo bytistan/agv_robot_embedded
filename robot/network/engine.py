@@ -4,15 +4,38 @@ import websocket
 import json
 from termcolor import colored
 import traceback
+from robot.settings import *
 
 class Esp32Client:
     def __init__(self):
-        self.server_url = "ws://192.168.137.119:5000"
+        self.server_url = "ws://10.100.68.74:80"
         self.ws = None
+        self.connect_to_server()
 
-    def send(self, order, speed=0):
+    def format_data(self,json_data):
         try:
-            message = f"{order}:{speed}" 
+            formatted_strings = []
+
+            if "PINS" in json_data:
+                for pin in json_data["PINS"]:
+                    formatted_strings.append(f"{pin['PIN']}:{pin['STATE']}")
+
+            if "PWM" in json_data:
+                for pwm in json_data["PWM"]:
+                    formatted_strings.append(f"{pwm['PIN']}:{pwm['PWM']}")
+
+            result_string = "$".join(formatted_strings)
+
+            return result_string
+
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+
+    def send(self, move):
+        try:
+            data = cont_data.get(int(move))
+            message = self.format_data(data)
             self.ws.send(message)
         except Exception as e:
             error_details = traceback.format_exc()

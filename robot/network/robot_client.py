@@ -1,4 +1,4 @@
-from .robot import Robot_
+from robot.robot import Robot_
 
 from models import *
 
@@ -81,7 +81,8 @@ class RobotClient:
                     qr_code_id = qr_code.id
                 )
 
-
+            print(colored(f"[INFO] Mission successuly coming.", "green" ,attrs=["bold"])) 
+            
             self.robot.run(mission)
         except Exception as e:
             error_details = traceback.format_exc()
