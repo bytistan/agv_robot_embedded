@@ -34,8 +34,7 @@ class ProtocolHandler:
 
             if not self.completed:
                 protocol = self.protocols[0]
-                ls = data.get("line_status")
-                protocol.update(ls)
+                protocol.update(data)
             
         except Exception as e:
             error_details = traceback.format_exc()

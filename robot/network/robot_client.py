@@ -69,8 +69,8 @@ class RobotClient:
             mission = Mission.create(robot_id=robot_id,is_active=is_active)
 
             for road_map in d:
+                qr_code = QRCode.filter_one(QRCode.area_name == road_map.get("area_name")) 
 
-                qr_code = db_session.query(QRCode).filter(QRCode.area_name==road_map.get("area_name")).first() 
                 if not qr_code:
                     print(colored(f"[WARN] Qr code not found.", "yellow" ,attrs=["bold"])) 
                     return

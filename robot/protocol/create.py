@@ -15,19 +15,43 @@ class ProtocolCreator:
     def control(self, d):
         try:
             ls = d.get("line_status")
+            ds = d.get("distance_status")
 
-            if not ls:
-                print(colored("[INFO] Line status not found.", "green", attrs=["bold"]))
-                return None, None
+            r = self.check_ls(ls)
+            
+            if r is not None:
+                name, protocol= r[0], r[1]
+                return name, protocol 
 
+            return None, None
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
+    def check_ds(self,ds):
+        try:
+            pass
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+            
+    def check_ls(self,ls): 
+        try:
             for entry in self.data:
                 fi = entry.get("fi") 
+                
+                if fi is None:
+                    print(colored(f"[WARN] Fi not found, check protocol/config.json", "yellow", attrs=["bold"]))
+                    return
+
+                fi_ls = fi.get("ls")
+                  
                 protocol = entry.get("protocol")
                 name = entry.get("name")
                 
                 flag = True
 
-                for fi_key,fi_item in fi.items():
+                for fi_key,fi_item in fi_ls.items():
                     per = fi_item[0]
                     state = fi_item[1]
 
@@ -36,9 +60,7 @@ class ProtocolCreator:
                     if state == 0 and per < ls.get(int(fi_key)): 
                         flag = False
                 if flag:
-                    return name,protocol
-                    
-            return None, None
+                    return (name,protocol)
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
@@ -58,12 +80,12 @@ class ProtocolCreator:
 
             for p in data:
                 move = p.get("move")
-                speed = p.get("speed")
+                pwms = p.get("pwms")
                 to = p.get("to")
 
                 protocol = Protocol(
                     move,
-                    speed,
+                    pwms,
                     self.create_to(to),
                     esp32_client
                 )

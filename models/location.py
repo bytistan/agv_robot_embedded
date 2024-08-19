@@ -13,9 +13,6 @@ class Location(BaseModel):
     vertical_coordinate = Column(Float, nullable=False)
     horizontal_coordinate = Column(Float, nullable=False)
 
-    direction_horizontal = Column(Integer, nullable=False,default=0)
-    direction_vertical = Column(Integer, nullable=False,default=0)
-
     synchronized = Column(Boolean,default=False)
 
     update_date = Column(DateTime, default=datetime.utcnow)

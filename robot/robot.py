@@ -2,27 +2,38 @@ from camera.cam import Camera
 from image_process.line_follower import LineFollower 
 from models import *
 
-from .protocol.create import ProtocolCreator
 from .network.engine import Esp32Client
+from .network.sensor import SensorListener
+
+from .location.scanner import Scanner
+from .protocol.create import ProtocolCreator
+
+from .settings import *
 
 import cv2 
 import time 
-from termcolor import colored
-
 import threading 
 import traceback
 
+from termcolor import colored
+
 class Robot_:
     def __init__(self):
-        self.camera = Camera()
-        self.esp2_client = Esp32Client()
+        self.tolerance = 100 
 
+        self.esp2_client = Esp32Client("ws://10.100.68.75:80")
+        self.sensor_listener = SensorListener("ws://10.100.68.74:80")
+
+        self.camera = Camera()
         self.line_follower = LineFollower()
+        self.scanner = Scanner(self.tolerance)
+
         self.protocol_creator = ProtocolCreator()
-        self.location_ = Location()
 
         self.data = {
-            "line_status":None
+            "line_status":None,
+            "distance_status":None,
+            "qr_data":None
         }
         
         self.start_time = time.time()
@@ -50,6 +61,7 @@ class Robot_:
             "line_center":1
         }
 
+    
     def stop(self):
         try:
             self.camera.close()
@@ -89,11 +101,20 @@ class Robot_:
     def run(self, mission):
         self.setup(mission)
 
+        self.esp2_client.send(
+            1,
+            pwms_data.get("pwms")
+        )
+
         while True:
             try:
                 frame = self.camera.capture_frame()
-
+                    
+                self.scanner.update(frame)
+                
+                self.data["distance_status"] = self.sensor_listener.data.get("distance")
                 self.data["line_status"] = self.line_follower.update(frame)
+
                 m,protocol = self.protocol_creator.control(self.data)
 
                 if self.mode.get(m) is None and protocol is not None:

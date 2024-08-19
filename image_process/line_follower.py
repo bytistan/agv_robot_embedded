@@ -14,11 +14,10 @@ class LineFollower:
             3 : (0,1),
             4 : (1,1),
             5 : (2,1),
-
-            6 : (0,2),
             7 : (1,2),
+            6 : (0,2),
             8 : (2,2)
-        }
+        } 
 
     def process(self, gray_image, w, h, col, row, distance, center_ratio=1):
         try:
@@ -37,7 +36,7 @@ class LineFollower:
             center_region = gray_image[center_y_start:center_y_end, center_x_start:center_x_end]
             
             total_pixels = center_region.size
-            black_pixels = np.count_nonzero(center_region < 48)
+            black_pixels = np.count_nonzero(center_region < 52)
             
             black_ratio_percent = (black_pixels / total_pixels) * 100
             return black_ratio_percent
@@ -57,8 +56,7 @@ class LineFollower:
             
             for region_number,cor in self.data.items():
                 black_ratio_percent = self.process(gray_frame,w,h,cor[0],cor[1],distance)
-                data[region_number] = black_ratio_percent     
-                data[region_number] = black_ratio_percent    
+                data[region_number] = int(black_ratio_percent)
               
             return data
         except Exception as e:

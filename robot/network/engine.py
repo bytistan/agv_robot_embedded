@@ -7,21 +7,21 @@ import traceback
 from robot.settings import *
 
 class Esp32Client:
-    def __init__(self):
-        self.server_url = "ws://10.100.68.74:80"
+    def __init__(self,url):
+        self.server_url = url 
         self.ws = None
         self.connect_to_server()
 
-    def format_data(self,json_data):
+    def format_data(self, pins, pwms):
         try:
             formatted_strings = []
 
-            if "PINS" in json_data:
-                for pin in json_data["PINS"]:
+            if pins:
+                for pin in pins:
                     formatted_strings.append(f"{pin['PIN']}:{pin['STATE']}")
 
-            if "PWM" in json_data:
-                for pwm in json_data["PWM"]:
+            if pwms:
+                for pwm in pwms:
                     formatted_strings.append(f"{pwm['PIN']}:{pwm['PWM']}")
 
             result_string = "$".join(formatted_strings)
@@ -32,10 +32,11 @@ class Esp32Client:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
-    def send(self, move):
+    def send(self, move, pwms):
         try:
-            data = cont_data.get(int(move))
-            message = self.format_data(data)
+            pins = pins_data.get(int(move))
+            message = self.format_data(pins, pwms)
+
             self.ws.send(message)
         except Exception as e:
             error_details = traceback.format_exc()
@@ -52,7 +53,7 @@ class Esp32Client:
             wst.daemon = True
             wst.start()
             
-            time.sleep(5)
+            time.sleep(3)
         except KeyboardInterrupt:
             self.ws.close()
             print(colored("Bye :)", "yellow", attrs=["bold"]))

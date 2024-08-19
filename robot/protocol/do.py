@@ -3,12 +3,12 @@ from termcolor import colored
 import time 
 
 class Protocol:
-    def __init__(self, move, speed, protocol_controller, esp32_client):
+    def __init__(self, move, pwms, protocol_controller, esp32_client):
         self.completed = False
         self.process = False
         
         self.move = move
-        self.speed = speed
+        self.pwms = pwms 
         self.protocol_controller = protocol_controller
 
         self.esp32_client = esp32_client
@@ -30,7 +30,7 @@ class Protocol:
         try:
             if not self.process:
                 print(colored(f"[MOVE]:[{self.move}]", "yellow", attrs=["bold"]))
-                self.esp32_client.send(self.move)
+                self.esp32_client.send(self.move,self.pwms)
                 self.process = True 
         except Exception as e:
             error_details = traceback.format_exc()

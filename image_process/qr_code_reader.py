@@ -15,7 +15,6 @@ def is_qr_code_centered(bbox, img, tolerance):
             distance_y = abs(qr_center_y - img_center_y)
             
             if distance_x <= tolerance and distance_y <= tolerance:
-                print(colored("[INFO] QR code is centered.", "green", attrs=["bold"]))
                 return True
             else:
                 return False
