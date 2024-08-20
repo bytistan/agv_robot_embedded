@@ -102,7 +102,7 @@ class Robot_:
         self.setup(mission)
 
         self.esp2_client.send(
-            1,
+            0,
             pwms_data.get("pwms")
         )
 
@@ -114,6 +114,8 @@ class Robot_:
                 
                 self.data["distance_status"] = self.sensor_listener.data.get("distance")
                 self.data["line_status"] = self.line_follower.update(frame)
+                
+                print(self.data["line_status"])
 
                 m,protocol = self.protocol_creator.control(self.data)
 

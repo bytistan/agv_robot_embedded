@@ -30,7 +30,7 @@ class Protocol:
         try:
             if not self.process:
                 print(colored(f"[MOVE]:[{self.move}]", "yellow", attrs=["bold"]))
-                self.esp32_client.send(self.move,self.pwms)
+                # self.esp32_client.send(self.move,self.pwms)
                 self.process = True 
         except Exception as e:
             error_details = traceback.format_exc()

@@ -19,7 +19,50 @@ class LineFollower:
             8 : (2,2)
         } 
 
-    def process(self, gray_image, w, h, col, row, distance, center_ratio=1):
+        self.col_data = [
+            {
+                "sx":0,
+                "sy":0,
+                "wx":1,
+                "hx":0.15
+            },
+            {
+                "sx":0,
+                "sy":0.45,
+                "wx":1,
+                "hx":0.1
+            },
+            {
+                "sx":0,
+                "sy":0.85,
+                "wx":1,
+                "hx":0.15
+            }
+        ]
+
+    def calculate_one_square_col_black_ratio(self, image, start_x_percent, start_y_percent, width_percent, height_percent):
+        try:
+            height, width = image.shape
+
+            start_x = int(start_x_percent * width)
+            start_y = int(start_y_percent * height)
+            region_width = int(width_percent * width)
+            region_height = int(height_percent * height)
+
+            region = image[start_y:start_y + region_height, start_x:start_x + region_width]
+
+            black_pixels = np.sum(region < 48)  
+            total_pixels = region.size
+
+            black_ratio = (black_pixels / total_pixels) * 100
+
+            return black_ratio
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+
+
+    def crop_image(self, gray_image, w, h, col, row, distance, center_ratio=1):
         try:
             y_start, y_end = row * h, (row + 1) * h
             x_start, x_end = col * w + distance // 2, (col + 1) * w + distance // 2 
@@ -34,12 +77,38 @@ class LineFollower:
             center_x_end = center_x_start + center_width
 
             center_region = gray_image[center_y_start:center_y_end, center_x_start:center_x_end]
-            
-            total_pixels = center_region.size
-            black_pixels = np.count_nonzero(center_region < 52)
+
+            return center_region
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+        
+    def process(self,frame):
+        try:
+            total_pixels = frame.size
+            black_pixels = np.count_nonzero(frame < 48)
             
             black_ratio_percent = (black_pixels / total_pixels) * 100
             return black_ratio_percent
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+    
+    def one_square_col_process(self, frame, region_number):
+        try:
+            tmp = {}
+
+            for index,d in enumerate(self.col_data):
+                start_x_percent = d.get("sx") 
+                start_y_percent = d.get("sy") 
+                width_percent = d.get("wx") 
+                height_percent = d.get("hx") 
+
+                black_ratio = self.calculate_one_square_col_black_ratio(frame, start_x_percent, start_y_percent, width_percent, height_percent)
+
+                tmp[f"{region_number}:{index}"] = int(black_ratio)
+
+            return tmp
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
@@ -55,8 +124,12 @@ class LineFollower:
             data = {} 
             
             for region_number,cor in self.data.items():
-                black_ratio_percent = self.process(gray_frame,w,h,cor[0],cor[1],distance)
+                frame = self.crop_image(gray_frame,w,h,cor[0],cor[1],distance)
+                black_ratio_percent = self.process(frame)
                 data[region_number] = int(black_ratio_percent)
+
+                if region_number == 5:
+                    data["lc"] = self.one_square_col_process(frame,region_number)
               
             return data
         except Exception as e:
