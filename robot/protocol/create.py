@@ -55,9 +55,9 @@ class ProtocolCreator:
                     per = fi_item[0]
                     state = fi_item[1]
 
-                    if state == 1 and per > ls.get(int(fi_key)):
+                    if state == 1 and per > ls.get(str(fi_key)):
                         flag = False
-                    if state == 0 and per < ls.get(int(fi_key)): 
+                    if state == 0 and per < ls.get(str(fi_key)): 
                         flag = False
                 if flag:
                     return (name,protocol)

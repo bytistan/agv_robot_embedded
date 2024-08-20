@@ -87,10 +87,10 @@ class Scanner:
                 self.save_qr(self.qr_data)
 
             if self.debug:
-                print(colored(f"[INFO] Qr code detected {r[0]}", "green", attrs=["bold"]))
+                # print(colored(f"[INFO] Qr code detected {r[0]}", "green", attrs=["bold"]))
                 color = "green" if self.centered  else "yellow" 
 
-                print(colored(f"[INFO] Centered : {self.centered}", color, attrs=["bold"]))
+                # print(colored(f"[INFO] Centered : {self.centered}", color, attrs=["bold"]))
 
         except Exception as e:
             error_details = traceback.format_exc()

@@ -15,10 +15,14 @@ class ProtocolController:
     def setup(self, to):
         try:
             self.ls = to.get("ls")
+            self.lso = to.get("lso")
+
             self.sleep = to.get("sleep")
             self.wheel = to.get("wheel")
 
             self.ls_flag = False if self.ls else None
+            self.lso_flag = False if self.lso else None
+
             self.wheel_flag = False if self.wheel else None
             self.sleep_flag = False if self.sleep else None 
 
@@ -42,6 +46,9 @@ class ProtocolController:
             if self.ls_flag is not None:
                 return self.line_controller(data, to)
 
+            if self.lso_flag is not None:
+                return self.line_controll_or(data, to)
+
             if self.sleep_flag is not None:
                 return self.sleep_controller(data, to) 
             
@@ -51,7 +58,23 @@ class ProtocolController:
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+            
+    def line_controll_or(self, data, to):
+        try:
+            cam_data = data.get("line_status")
+
+            index = self.lso.get("index")
+            black_percent = self.lso.get("bp") 
+
+            for i in index:
+
+                if cam_data.get(str(i)) > black_percent:
+                    return True
                 
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
     def line_controller(self, data, to):
         try:
             cam_data = data.get("line_status")
@@ -59,14 +82,14 @@ class ProtocolController:
 
             for key,item in self.ls.items():  
                 
-                index = int(key) 
+                index = key 
 
                 state = item[1]
                 per = item[0] 
 
-                if state == 1 and cam_data.get(index) < per:
+                if state == 1 and cam_data.get(str(index)) < per:
                     flag = False
-                if state == 0 and cam_data.get(index) > per:
+                if state == 0 and cam_data.get(str(index)) > per:
                     flag = False
 
             return flag

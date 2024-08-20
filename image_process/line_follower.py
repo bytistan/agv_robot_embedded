@@ -126,10 +126,10 @@ class LineFollower:
             for region_number,cor in self.data.items():
                 frame = self.crop_image(gray_frame,w,h,cor[0],cor[1],distance)
                 black_ratio_percent = self.process(frame)
-                data[region_number] = int(black_ratio_percent)
+                data[str(region_number)] = int(black_ratio_percent)
 
                 if region_number == 5:
-                    data["lc"] = self.one_square_col_process(frame,region_number)
+                    data.update(self.one_square_col_process(frame,region_number))
               
             return data
         except Exception as e:
