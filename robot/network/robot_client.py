@@ -54,21 +54,27 @@ class RobotClient:
             error_details = traceback.format_exc()
             print(colored(f"[ERR] {e}\n[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def handle_mission(self, data):
+    def save_mission(self):
         try:
-            if not data.get("message"):
-                print(colored(f"[WARN] Invalid message : {data}.", "yellow" ,attrs=["bold"])) 
-                return  
-
             robot_id = self.robot_info.id
-            d = data.get("message")
                 
             any_active_mission = Mission.filter_one(Mission.is_active==True)
             is_active = False if any_active_mission else True
 
+            if not is_active:
+                print(colored(f"[WARN] Active mission detected id:{any_active_mission.id}.", "yellow" ,attrs=["bold"])) 
+
             mission = Mission.create(robot_id=robot_id,is_active=is_active)
 
-            for road_map in d:
+            print(colored(f"[INFO] Mission saved to database id:{mission.id}.", "green" ,attrs=["bold"])) 
+            return mission
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[ERR] {e}\n[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
+    def save_road_map(self, mission, message):
+        try:
+            for road_map in message:
                 qr_code = QRCode.filter_one(QRCode.area_name == road_map.get("area_name")) 
 
                 if not qr_code:
@@ -80,6 +86,27 @@ class RobotClient:
                     index = road_map.get("index"),
                     qr_code_id = qr_code.id
                 )
+
+            print(colored(f"[INFO] Road map successfully saved to database.", "green" ,attrs=["bold"])) 
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[ERR] {e}\n[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
+    def handle_mission(self, data):
+        try:
+            message = data.get("message")
+
+            if not message:
+                print(colored(f"[WARN] Invalid message : {data}.", "yellow" ,attrs=["bold"])) 
+                return  
+
+            mission = self.save_mission()
+
+            if mission is  None:
+                print(colored(f"[WARN] Mission not found.", "yellow" ,attrs=["bold"])) 
+                return  
+
+            self.save_road_map(mission, message)
 
             print(colored(f"[INFO] Mission successuly coming.", "green" ,attrs=["bold"])) 
             

@@ -1,7 +1,6 @@
 from helper.json_helper import read_json
 
 from .do import Protocol
-from .handler import ProtocolHandler
 
 import traceback
 from termcolor import colored

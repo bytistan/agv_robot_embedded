@@ -11,28 +11,30 @@ class Scanner:
     def __init__(self,tolerance):
         self.tolerance = tolerance
 
-        self.qr_data = {
+        self.data = {
             "area_name":None,
             "vertical_coordinate":None,
-            "horizontal_coordinate":None
+            "horizontal_coordinate":None,
+            "is_centered":False
         }  
 
-        self.centered = None
-        
         self.debug = False
 
         self.robot = Robot.filter_one(Robot.id > 0)            
 
-    def save_qr(self,qr_data): 
-        try:
+        self.last_scanned = []
+        
+        self.flag = False
 
-            if qr_data is None:
+    def save_qr(self,data): 
+        try:
+            if data is None:
                 print(colored(f"[WARN] Invalid data check parent function.", "yellow", attrs=["bold"]))
                 return 
 
-            area_name=qr_data.get("area_name")
-            vertical_coordinate=qr_data.get("vertical_coordinate")
-            horizontal_coordinate=qr_data.get("horizontal_coordinate")
+            area_name=data.get("area_name")
+            vertical_coordinate=data.get("vertical_coordinate")
+            horizontal_coordinate=data.get("horizontal_coordinate")
 
             is_qr = QRCode.filter_one(QRCode.area_name==area_name)
 
@@ -50,6 +52,21 @@ class Scanner:
                 horizontal_coordinate = horizontal_coordinate
             )
             
+            print(colored(f"[INFO] {area_name} is saved to database.", "green", attrs=["bold"]))
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
+    def update_location(self,data):            
+        try:
+            if data is None:
+                print(colored(f"[WARN] Invalid data check parent function.", "yellow", attrs=["bold"]))
+                return 
+
+            area_name=data.get("area_name")
+            vertical_coordinate=data.get("vertical_coordinate")
+            horizontal_coordinate=data.get("horizontal_coordinate")
+
             location = Location.filter_one(Location.id > 0)
             
             if location is None:
@@ -59,38 +76,109 @@ class Scanner:
                     horizontal_coordinate = horizontal_coordinate
                 )
                 return 
+            
+            self.flag = True 
 
             location.update(
+                location.id,
                 vertical_coordinate = vertical_coordinate,
                 horizontal_coordinate = horizontal_coordinate
             )
 
-            print(colored(f"[INFO] Deceted qr is saved to database.", "green", attrs=["bold"]))
+            print(colored(f"[INFO] Location updated to {vertical_coordinate}:{horizontal_coordinate}.", "green", attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def scan(self,frame):
         try:
-            r = qr_reader(frame,self.tolerance)
+            read_qr,is_centered = qr_reader(frame,self.tolerance)
             
-            if r is None or r[0] is None:
+            if read_qr is None or read_qr.get("area_name") is None:
                 return
             else:
                 self.debug = False
             
-            if self.qr_data.get("area_name") != r[0].get("area_name"): 
-                self.qr_data = r[0]
-                self.centered = r[1]
+            if self.data.get("area_name") != read_qr.get("area_name") and read_qr.get("area_name") not in self.last_scanned: 
+
+                self.data = read_qr 
+                self.data["is_centered"] = is_centered 
+
                 self.debug = True
 
-                self.save_qr(self.qr_data)
+                self.save_qr(self.data)
+                self.update_location(self.data)
+                
+                self.last_scanned.append(self.data.get("area_name"))
+
+                if len(self.last_scanned) > 2:
+                    self.last_scanned.pop(-1)
 
             if self.debug:
-                # print(colored(f"[INFO] Qr code detected {r[0]}", "green", attrs=["bold"]))
-                color = "green" if self.centered  else "yellow" 
+                print(colored(f"[INFO] Qr code detected {read_qr.get('area_name')}", "green", attrs=["bold"]))
+                color = "green" if self.data.get("is_centered")  else "yellow" 
 
-                # print(colored(f"[INFO] Centered : {self.centered}", color, attrs=["bold"]))
+                print(colored(f"[INFO] Centered : {self.data.get('is_centered')}", color, attrs=["bold"]))
+
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
+    def find_direction(self):
+        try:
+            if len(self.last_scanned) < 1:
+                return
+
+            tmp = {}
+
+            for index,area_name in enumerate(self.last_scanned):
+                is_qr = QRCode.filter_one(QRCode.area_name==area_name)
+
+                if is_qr:
+                    tmp[f"{index}"] = is_qr
+            
+            if len(tmp.keys()) < 1:
+                print(colored(f"[WARN] Some qr is not saved to database check scanner.", color, attrs=["bold"]))
+                return
+           
+            direction = {
+                "x":0,
+                "y":0
+            }
+
+            if tmp[0].vertical_coordinate == tmp[1].vertical_coordinate:
+                if tmp[0].horizontal_coordinate > tmp[1].horizontal_coordinate:
+                    direction["x"] = 1
+                    direction["y"] = 0
+                elif tmp[0].horizontal_coordinate < tmp[1].horizontal_coordinate:
+                    direction["x"] = -1
+                    direction["y"] = 0
+                else:
+                    print(colored(f"[WARN] Horizontal coordinate is same.", color, attrs=["bold"]))
+
+            elif tmp[0].horizontal_coordinate == tmp[1].horizontal_coordinate:
+                if tmp[0].vertical_coordinate > tmp[1].vertical_coordinate:
+                    direction["y"] = 1
+                    direction["x"] = 0
+                elif tmp[0].vertical_coordinate < tmp[1].vertical_coordinate:
+                    direction["y"] = -1
+                    direction["x"] = 0
+                else:
+                    print(colored(f"[WARN] Horizontal coordinate is same.", color, attrs=["bold"]))
+
+            location = Location.filter_one(Location.id > 0)
+            
+            if location is None:
+                print(colored(f"[WARN] Location is not found.", "yellow", attrs=["bold"]))
+                return 
+
+            location.update(
+                location.id,
+                direction_x = direction.get("x"),
+                direction_y = direction.get("y") 
+            )
+
+            print(colored(f"[INFO] Direction is updated from qr {direction.get('x')}:{direction_get('y')}.", "yellow", attrs=["bold"]))
 
         except Exception as e:
             error_details = traceback.format_exc()

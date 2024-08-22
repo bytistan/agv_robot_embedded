@@ -2,11 +2,13 @@ from camera.cam import Camera
 from image_process.line_follower import LineFollower 
 from models import *
 
-from .network.engine import Esp32Client
-from .network.sensor import SensorListener
+from .brain import Brain 
+
+from .network.engine_client import Esp32Client
+from .network.sensor_client import SensorListener
 
 from .location.scanner import Scanner
-from .protocol.create import ProtocolCreator
+from .location.direction import Direction
 
 from .settings import *
 
@@ -14,6 +16,7 @@ import cv2
 import time 
 import threading 
 import traceback
+import sys 
 
 from termcolor import colored
 
@@ -27,8 +30,6 @@ class Robot_:
         self.camera = Camera()
         self.line_follower = LineFollower()
         self.scanner = Scanner(self.tolerance)
-
-        self.protocol_creator = ProtocolCreator()
 
         self.data = {
             "line_status":None,
@@ -48,20 +49,10 @@ class Robot_:
             "load":0,
             "mission_time":0
         }
+        
+        self.direction = Direction()
+        self.brain = Brain(self.esp2_client)
 
-        self.mode = {
-            "guidance":None,
-            "turn":None,
-            "line_center":None
-        }
-
-        self.mode_imp = {
-            "guidance":0,
-            "turn":2,
-            "line_center":1
-        }
-
-    
     def stop(self):
         try:
             self.camera.close()
@@ -69,6 +60,7 @@ class Robot_:
             self.camera.close()
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
 
     def setup(self, mission):
         try:
@@ -81,29 +73,12 @@ class Robot_:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def find_mode(self):
-        try:
-            mode = "guidance" 
-
-            for tmp_mode,protocol_handler in self.mode.items():
-                
-                tmp_imp_num = self.mode_imp.get(tmp_mode)
-                mode_imp_num = self.mode_imp.get(mode)
-
-                if tmp_imp_num > mode_imp_num and protocol_handler:
-                    mode = tmp_mode
-
-            return mode 
-        except:
-            error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
-
     def run(self, mission):
         self.setup(mission)
 
         self.esp2_client.send(
             1,
-            pwms_data.get("pwms")
+            pwms_data.get(0)
         )
 
         while True:
@@ -114,33 +89,23 @@ class Robot_:
                 
                 self.data["distance_status"] = self.sensor_listener.data.get("distance")
                 self.data["line_status"] = self.line_follower.update(frame)
-                
-                m,protocol = self.protocol_creator.control(self.data)
-
-                if self.mode.get(m) is None and protocol is not None:
-                    self.mode[m] = self.protocol_creator.create(protocol,self.esp2_client) 
-                
-                fm = self.find_mode()
-
-                protocol_handler = self.mode.get(fm) 
-
-                if fm is not None and protocol_handler is not None:
-                    protocol_handler.update(self.data)  
-                    
-                    if protocol_handler.completed:
-                        self.mode[fm] = None
+                self.data["scanned"] = self.scanner.data
 
                 if frame is None:
                     print(colored("[WARN] Camera is not working.", "yellow", attrs=["bold"]))
                     break   
                 
+                self.brain.update(self.data)
+
             except KeyboardInterrupt:
                 self.camera.close()
+                sys.exit()
                 break 
             except Exception as e:
                 self.camera.close()
                 error_details = traceback.format_exc()
                 print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+                sys.exit()
                 break
 
         self.stop() 

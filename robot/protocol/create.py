@@ -81,12 +81,14 @@ class ProtocolCreator:
             for p in data:
                 move = p.get("move")
                 pwms = p.get("pwms")
+                name = p.get("name")
                 to = p.get("to")
 
                 protocol = Protocol(
                     move,
                     pwms,
                     self.create_to(to),
+                    name,
                     esp32_client
                 )
 

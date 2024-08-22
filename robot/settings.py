@@ -100,11 +100,10 @@ pins_data = {
 }
 
 pwms_data= {
-    "pwms": [
+    0: [
         {"PIN":"NW_PWM","PWM":225},
         {"PIN":"NE_PWM","PWM":225},
         {"PIN":"SW_PWM","PWM":225},
         {"PIN":"SE_PWM","PWM":225}
     ],
-    
 } 
