@@ -85,7 +85,7 @@ class Scanner:
                 horizontal_coordinate = horizontal_coordinate
             )
 
-            print(colored(f"[INFO] Location updated to {vertical_coordinate}:{horizontal_coordinate}.", "green", attrs=["bold"]))
+            # print(colored(f"[INFO] Location updated to {horizontal_coordinate}:{vertical_coordinate}.", "green", attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
@@ -115,7 +115,7 @@ class Scanner:
                     self.last_scanned.append(self.data.get("area_name"))
 
                 if len(self.last_scanned) > 2:
-                    self.last_scanned.pop(-1)
+                    self.last_scanned.pop(0)
 
             if self.debug:
                 print(colored(f"[INFO] Qr code detected {read_qr.get('area_name')}:{read_qr.get('horizontal_coordinate')}:{read_qr.get('vertical_coordinate')}", "green", attrs=["bold"]))

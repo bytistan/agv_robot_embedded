@@ -33,7 +33,7 @@ class Protocol:
             if not self.process:
                 self.esp32_client.send(self.move,self.pwms)
                 
-                if self.move in [5,6]:
+                if self.move in [5,6] and self.name == "turn":
                     self.direction.update(self.move) 
 
                 self.process = True 

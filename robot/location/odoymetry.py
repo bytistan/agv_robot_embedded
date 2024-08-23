@@ -61,7 +61,7 @@ class Odoymetry:
 
                 location.update(
                     location.id,
-                    vertical_coordinate = vertical_coordinate   
+                    vertical_coordinate = new_vertical_coordinate   
                 )
 
         except Exception as e:

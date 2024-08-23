@@ -24,7 +24,7 @@ class Navigation:
                 if road_map.index < tmp.index:
                     tmp = road_map
             
-            print(colored(f"[INFO] Destinatination found id:{tmp.id}.", "green", attrs=["bold"]))
+            print(colored(f"[INFO] Destinatination found id:{tmp.id}.", "blue", attrs=["bold"]))
             return tmp 
 
         except Exception as e:
@@ -40,7 +40,7 @@ class Navigation:
                 self.flag = False 
                 return 
 
-            print(colored(f"[INFO] Navigation mission is found id:{self.mission.id}.", "yellow", attrs=["bold"]))
+            print(colored(f"[INFO] Navigation mission is found id:{self.mission.id}.", "blue", attrs=["bold"]))
 
             self.destination = self.find() 
 
@@ -63,7 +63,7 @@ class Navigation:
                 print(colored(f"[WARN] Mission is completed or coordinate not found.", "yellow", attrs=["bold"]))
                 return  
 
-            print(colored(f"[INFO] Destination area is {self.destination.area_name}.", "yellow", attrs=["bold"]))
+            print(colored(f"[INFO] Destination area is {self.destination.area_name}.", "blue", attrs=["bold"]))
 
         except Exception as e:
             error_details = traceback.format_exc()

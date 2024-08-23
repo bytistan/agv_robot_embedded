@@ -92,18 +92,18 @@ class Guidance:
             d_vc = dest.get("vertical_coordinate")
             d_hc = dest.get("horizontal_coordinate")
 
-            if location.direction_x != 0 and self.reached.get("y"):
+            if location.direction_x != 0 and self.reached.get("x"):
                 if location.vertical_coordinate > d_vc:
                     tmp["y"] = -1
                 elif location.vertical_coordinate < d_vc:
                     tmp["y"] = 1
 
-            elif location.direction_y != 0 and self.reached.get("x"):
+            elif location.direction_y != 0 and self.reached.get("y"):
                 if location.horizontal_coordinate > d_hc:
                     tmp["x"] = -1
                 elif location.horizontal_coordinate < d_hc:
                     tmp["x"] = 1
-            
+            print(tmp)            
             move = self.which(
                        location, 
                        tmp.get("x"), 
@@ -114,7 +114,7 @@ class Guidance:
                 # print(colored(f"[WARN] Move is not found.", "red", attrs=["bold"]))
                 return 
 
-                print(colored(f"[INFO] Move {move}.", "green", attrs=["bold"]))
+                print(colored(f"[INFO] Move to {move}.", "green", attrs=["bold"]))
             return move
         except Exception as e:
             error_details = traceback.format_exc()
@@ -142,7 +142,7 @@ class Guidance:
             self.reached["x"] = True if  l_hc + self.tolerance > d_hc > l_hc - self.tolerance else False      
 
             self.reached["y"] = True if l_vc + self.tolerance > d_vc > l_vc - self.tolerance else False  
-            
+
             if self.reached["x"] and self.reached["y"]:
                 self.rest()
                 self.flag = True
