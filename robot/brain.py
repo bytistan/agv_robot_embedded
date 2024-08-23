@@ -9,6 +9,8 @@ from robot.protocol.guidance import Guidance
 
 from .location.odoymetry import Odoymetry
 
+from .settings import *
+
 class Brain:
     def __init__(self,esp2_client):
         self.mode = {
@@ -44,7 +46,7 @@ class Brain:
 
                 if tmp_imp_num > mode_imp_num and protocol_handler:
                     mode = tmp_mode
-
+            
             return mode 
         except:
             error_details = traceback.format_exc()
@@ -55,21 +57,29 @@ class Brain:
             m,protocol = self.protocol_creator.control(data)
 
             if self.mode.get(m) is None and protocol is not None:
-                self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+                if m == "turn":
+                    if self.guidance.move is not None and protocol[0].get("move") == self.guidance.move:
+                        self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+                else:
+                    self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
 
             fm = self.find_mode()
-
             protocol_handler = self.mode.get(fm) 
-
+        
             if fm is not None and protocol_handler is not None:
                 protocol_handler.update(data)  
             
             if protocol_handler is not None:
                 if protocol_handler.completed:
+                    if fm == "turn":
+                        self.guidance.move = None  
+
                     self.mode[fm] = None
-            
+ 
             if self.mode.get("turn") is None and self.mode.get("line_center") is None:
                 self.odoymetry.update(data)
+
+            self.guidance.update(data ,self.mode)
 
         except Exception as e:
             error_details = traceback.format_exc()

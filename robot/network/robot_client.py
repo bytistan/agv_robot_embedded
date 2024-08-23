@@ -75,16 +75,17 @@ class RobotClient:
     def save_road_map(self, mission, message):
         try:
             for road_map in message:
-                qr_code = QRCode.filter_one(QRCode.area_name == road_map.get("area_name")) 
+                area_name = road_map.get("area_name")
+                index = road_map.get("index") 
 
-                if not qr_code:
-                    print(colored(f"[WARN] Qr code not found.", "yellow" ,attrs=["bold"])) 
+                if area_name is None:
+                    print(colored(f"[WARN] Message not valid.", "yellow" ,attrs=["bold"])) 
                     return
 
                 RoadMap.create(
-                    mission_id=mission.id,
-                    index = road_map.get("index"),
-                    qr_code_id = qr_code.id
+                    mission_id = mission.id,
+                    area_name = area_name,
+                    index = index 
                 )
 
             print(colored(f"[INFO] Road map successfully saved to database.", "green" ,attrs=["bold"])) 

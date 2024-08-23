@@ -8,8 +8,8 @@ from .settings import *
 class Direction:
     def __init__(self):
         self.robot = Robot.filter_one(Robot.id > 0)            
-        self.setup()        
-        
+        self.flag = False
+
     def setup(self):
         try:
             location = Location.filter_one(Location.id > 0)
@@ -23,37 +23,6 @@ class Direction:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def which(self, location, x, y):
-        try:
-            left = 5
-            right = 6
-            
-            if location.direction_x == 1:
-                if y == 1:
-                    return right
-                elif y == -1:
-                    return left
-            elif location.direction_x == -1:
-                if y == 1:
-                    return left
-                elif y == -1:
-                    return right
-            elif location.direction_y == 1:
-                if x == 1:
-                    return left
-                elif x == -1:
-                    return right
-            elif location.direction_y == -1:
-                if x == 1:
-                    return right 
-                elif x == -1:
-                    return left 
-            else:
-                print(colored(f"[WARN] Direction not found, it's gonne be problem.", "yellow", attrs=["bold"]))
-
-        except Exception as e:
-            error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def find(self, location, move):
         try:
@@ -80,10 +49,15 @@ class Direction:
 
     def update(self,move):
         try:
+            if not self.flag:
+                self.flag = True 
+                self.setup()
+
+            self.setup()        
             location = Location.filter_one(Location.id > 0)
             
             if location is None:
-                print(colored(f"[WARN] Location is not found.", "red", attrs=["bold"]))
+                print(colored(f"[WARN] Location is not found.", "yellow", attrs=["bold"]))
                 return
             
             new_direction = self.find(location,move)

@@ -66,7 +66,6 @@ class ProtocolController:
             black_percent = self.lso.get("bp") 
 
             for i in index:
-
                 if cam_data.get(str(i)) > black_percent:
                     return True
                 
@@ -98,10 +97,11 @@ class ProtocolController:
             
     def sleep_controller(self, data, to):
         try:
-                current_time = time.time() 
-                # print(colored(f"[INFO] {current_time},{self.target_time}", "yellow", attrs=["bold"]))
-                if current_time > self.target_time:
-                    return True
+            current_time = time.time() 
+            # print(colored(f"[INFO] {current_time},{self.target_time}", "yellow", attrs=["bold"]))
+            if current_time > self.target_time:
+                return True
+
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

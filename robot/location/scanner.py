@@ -92,6 +92,8 @@ class Scanner:
 
     def scan(self,frame):
         try:
+            # self.find_direction()
+
             read_qr,is_centered = qr_reader(frame,self.tolerance)
             
             if read_qr is None or read_qr.get("area_name") is None:
@@ -109,7 +111,8 @@ class Scanner:
                 self.save_qr(self.data)
                 self.update_location(self.data)
                 
-                self.last_scanned.append(self.data.get("area_name"))
+                if self.data.get("area_name") not in self.last_scanned:
+                    self.last_scanned.append(self.data.get("area_name"))
 
                 if len(self.last_scanned) > 2:
                     self.last_scanned.pop(-1)
@@ -136,7 +139,7 @@ class Scanner:
                 is_qr = QRCode.filter_one(QRCode.area_name==area_name)
 
                 if is_qr:
-                    tmp[f"{index}"] = is_qr
+                    tmp[index] = is_qr
             
             if len(tmp.keys()) < 1:
                 print(colored(f"[WARN] Some qr is not saved to database check scanner.", color, attrs=["bold"]))

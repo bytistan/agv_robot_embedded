@@ -36,7 +36,6 @@ class Protocol:
                 if self.move in [5,6]:
                     self.direction.update(self.move) 
 
-                print(colored(f"[MOVE]:[{self.move}]", "yellow", attrs=["bold"]))
                 self.process = True 
         except Exception as e:
             error_details = traceback.format_exc()

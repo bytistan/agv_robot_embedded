@@ -38,10 +38,22 @@ class SensorListener:
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
     def on_error(self, ws, error):
-        print(colored(f"[TRACEBACK]: {error}", "red", attrs=["bold"]))
+        try:
+            print(colored(f"[TRACEBACK]: {error}", "red", attrs=["bold"]))
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
     def on_close(self, ws, close_status_code, close_msg):
-        print(colored(f"[WARN] Connection closed sensors.", "yellow", attrs=["bold"]))
+        try:
+            print(colored(f"[WARN] Connection closed sensors.", "yellow", attrs=["bold"]))
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
     def on_open(self, ws):
-        print(colored(f"[INFO] Connect to the sensors.", "green", attrs=["bold"]))
+        try:
+            print(colored(f"[INFO] Connect to the sensors.", "green", attrs=["bold"]))
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))

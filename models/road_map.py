@@ -8,7 +8,8 @@ class RoadMap(BaseModel):
     
     id = Column(Integer, primary_key=True)
     mission_id = Column(Integer, ForeignKey("mission.id"))
-    qr_code_id = Column(Integer, ForeignKey("qr_code.id"))
+
+    area_name = Column(String, nullable=False)
 
     active = Column(Boolean, default=False)
     reached = Column(Boolean, default=False)
@@ -20,4 +21,3 @@ class RoadMap(BaseModel):
     created_date = Column(DateTime, default=datetime.utcnow)
 
     mission = relationship("Mission", back_populates="road_map")
-    qr_code = relationship("QRCode", back_populates="road_map")

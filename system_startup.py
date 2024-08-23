@@ -1,7 +1,7 @@
 from network import url 
 from network.api.login import login
 
-from init.init import init_ ,init_default_qr
+from init.init import init_
 from database import engine 
 
 from models import * 
@@ -17,9 +17,8 @@ class SystemStartup:
         try:
             # Create database and insert some information.
             Base.metadata.create_all(engine)
-
+                
             init_()
-            init_default_qr()
         except Exception as e:
             print(colored(f"[ERR] {e}", "red", attrs=["bold"]))
 

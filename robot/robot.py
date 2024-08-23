@@ -64,6 +64,28 @@ class Robot_:
             self.robot = Robot.filter_one(Robot.id > 0) 
             self.connection = Connection.filter_one(Connection.id > 0)
             self.loop_time = time.time()
+            self.mission = mission
+
+            location = Location.filter_one(Location.id > 0)
+            
+            if location is None:
+                Location.create(
+                    mission_id = mission.id,
+                    vertical_coordinate = 0.0,
+                    horizontal_coordinate = 0.0,
+                    direction_x = 1,
+                    direction_y = 0
+                )
+                print(colored(f"[INFO] Location is setup.", "green", attrs=["bold"]))
+            else:
+                location.update(
+                    location.id,
+                    vertical_coordinate = 0.0,
+                    horizontal_coordinate = 0.0,
+                    direction_x = 1,
+                    direction_y = 0
+                )
+
         except Exception as e:
             self.camera.close()
             error_details = traceback.format_exc()
@@ -74,7 +96,7 @@ class Robot_:
 
         self.esp2_client.send(
             1,
-            pwms_data.get(0)
+            pwms_data.get(1)
         )
 
         while True:
@@ -94,14 +116,30 @@ class Robot_:
                 self.brain.update(self.data)
                 
                 if self.brain.guidance.completed:
+                    self.esp2_client.send(
+                        0,
+                        pwms_data.get(0)
+                    )
+
+                    Mission.update(
+                            self.mission.id,
+                            is_active = False,
+                            completed = True
+                    )
+
                     print(colored("[INFO] Mission completed.", "yellow", attrs=["bold"]))
                     break
 
             except KeyboardInterrupt:
+                print(colored(f"Bye :)", "green", attrs=["bold"]))
+                self.esp2_client.close()
+                self.sensor_listener.close()
                 self.camera.close()
                 sys.exit()
                 break 
             except Exception as e:
+                self.esp2_client.close()
+                self.sensor_listener.close()
                 self.camera.close()
                 error_details = traceback.format_exc()
                 print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
