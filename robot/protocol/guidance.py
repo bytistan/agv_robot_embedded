@@ -11,7 +11,7 @@ from robot.settings import *
 class Guidance:
     def __init__(self):
         self.navigation = Navigation()
-        self.tolerance = 100 
+        self.tolerance = 250 
         
         self.reached = {
             "x":False,
@@ -103,7 +103,7 @@ class Guidance:
                     tmp["x"] = -1
                 elif location.horizontal_coordinate < d_hc:
                     tmp["x"] = 1
-            print(tmp)            
+
             move = self.which(
                        location, 
                        tmp.get("x"), 

@@ -44,7 +44,7 @@ class Brain:
                 tmp_imp_num = self.mode_imp.get(tmp_mode)
                 mode_imp_num = self.mode_imp.get(mode)
 
-                if tmp_imp_num > mode_imp_num and protocol_handler:
+                if tmp_imp_num > mode_imp_num and protocol_handler is not None:
                     mode = tmp_mode
             
             return mode 
@@ -56,12 +56,11 @@ class Brain:
         try:
             m,protocol = self.protocol_creator.control(data)
 
-            if self.mode.get(m) is None and protocol is not None:
-                if m == "turn":
-                    if self.guidance.move is not None and protocol[0].get("move") == self.guidance.move:
-                        self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
-                else:
+            if m == "turn" and self.mode.get(m) is None and protocol is not None:
+                if self.guidance.move is not None and protocol[0].get("move") == self.guidance.move:
                     self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+            elif self.mode.get(m) is None and protocol is not None:
+                self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
 
             fm = self.find_mode()
             protocol_handler = self.mode.get(fm) 
@@ -71,12 +70,12 @@ class Brain:
             
             if protocol_handler is not None:
                 if protocol_handler.completed:
+                    self.mode[fm] = None
+
                     if fm == "turn":
                         self.guidance.move = None  
 
-                    self.mode[fm] = None
- 
-            if self.mode.get("turn") is None and self.mode.get("line_center") is None:
+            if fm in ["guidance","line_center_pwm"]:
                 self.odoymetry.update(data)
 
             self.guidance.update(data ,self.mode)

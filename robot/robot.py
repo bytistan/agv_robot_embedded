@@ -122,9 +122,9 @@ class Robot_:
                     )
 
                     Mission.update(
-                            self.mission.id,
-                            is_active = False,
-                            completed = True
+                        self.mission.id,
+                        is_active = False,
+                        completed = True
                     )
 
                     print(colored("[INFO] Mission completed.", "yellow", attrs=["bold"]))

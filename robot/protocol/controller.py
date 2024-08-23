@@ -64,6 +64,9 @@ class ProtocolController:
 
             index = self.lso.get("index")
             black_percent = self.lso.get("bp") 
+            
+            if index is None or black_percent is None:
+                print(colored(f"[WARN] Line percent controller, invalid data check config.json", "yellow", attrs=["bold"]))
 
             for i in index:
                 if cam_data.get(str(i)) > black_percent:

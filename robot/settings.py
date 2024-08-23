@@ -127,23 +127,23 @@ destination_data = [
         },
         {
             "area_name":"A",
-            "horizontal_coordinate":13250.0,
-            "vertical_coordinate":6250.0
+            "horizontal_coordinate":3726.0,
+            "vertical_coordinate":1500.0
         },
         {
             "area_name":"B",
-            "horizontal_coordinate":10625.0,
-            "vertical_coordinate":6250.0,
+            "horizontal_coordinate":2988.0,
+            "vertical_coordinate":1500.0,
         },
         {
             "area_name":"C",
-            "horizontal_coordinate":5375.0,
-            "vertical_coordinate":6250.0
+            "horizontal_coordinate":1511.0,
+            "vertical_coordinate":1500.0
         },
         {
             "area_name":"D",
-            "horizontal_coordinate":2750.0,
-            "vertical_coordinate":6250.0
+            "horizontal_coordinate":733.0,
+            "vertical_coordinate":1500.0
         },
         {
             "area_name":"1",
@@ -153,16 +153,16 @@ destination_data = [
         {
             "area_name":"2",
             "horizontal_coordinate":0,
-            "vertical_coordinate":12500.0
+            "vertical_coordinate":3000.0
         },
         {
             "area_name":"3",
-            "horizontal_coordinate":16000.0,
-            "vertical_coordinate":12500.0
+            "horizontal_coordinate":4500.0,
+            "vertical_coordinate":3000.0
         },
         {
             "area_name":"4",
-            "horizontal_coordinate":16000.0,
+            "horizontal_coordinate":4500.0,
             "vertical_coordinate":0
         }
 ]
