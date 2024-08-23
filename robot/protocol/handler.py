@@ -12,9 +12,6 @@ class ProtocolHandler:
         self.protocols = []
         self.completed = False 
 
-
-
-
     def add(self,p):
         try:
             self.protocols.append(p) 

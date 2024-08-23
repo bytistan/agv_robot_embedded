@@ -5,6 +5,9 @@ import time
 from models import *
 
 from robot.protocol.create import ProtocolCreator 
+from robot.protocol.guidance import Guidance
+
+from .location.odoymetry import Odoymetry
 
 class Brain:
     def __init__(self,esp2_client):
@@ -25,7 +28,11 @@ class Brain:
         self.esp2_client = esp2_client
         self.protocol_creator = ProtocolCreator()
 
-        self.reflex = ["line_center","line_center_pwm"]
+        self.mission_id = None
+
+        self.guidance = Guidance()
+        self.odoymetry = Odoymetry()
+
     def find_mode(self):
         try:
             mode = "guidance" 
@@ -48,9 +55,8 @@ class Brain:
             m,protocol = self.protocol_creator.control(data)
 
             if self.mode.get(m) is None and protocol is not None:
-                if m in self.reflex: 
-                    pass
-                self.mode[m] = self.protocol_creator.create(protocol,self.esp2_client) 
+                self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+
             fm = self.find_mode()
 
             protocol_handler = self.mode.get(fm) 
@@ -58,8 +64,13 @@ class Brain:
             if fm is not None and protocol_handler is not None:
                 protocol_handler.update(data)  
             
-            if protocol_handler.completed:
-                self.mode[fm] = None
+            if protocol_handler is not None:
+                if protocol_handler.completed:
+                    self.mode[fm] = None
+            
+            if self.mode.get("turn") is None and self.mode.get("line_center") is None:
+                self.odoymetry.update(data)
+
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

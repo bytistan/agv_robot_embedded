@@ -5,8 +5,8 @@ import time
 from models import *
 
 class Navigation:
-    def __init__(self,mission_id):
-        self.mission_id = mission_id 
+    def __init__(self):
+        self.mission = Mission.filter_one(Mission.is_active == True) 
         self.setup()
 
     def find(self):
@@ -29,8 +29,8 @@ class Navigation:
 
     def setup(self):
         try:
-            self.data = RoadMap.filter(RoadMap.mission_id = self.mission_id,RoadMap.reached = False)  
-            self.destination = self.find(self) 
+            self.data = RoadMap.filter(RoadMap.mission_id == self.mission.id,RoadMap.reached == False)  
+            self.destination = self.find() 
 
         except Exception as e:
             error_details = traceback.format_exc()

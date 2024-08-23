@@ -18,11 +18,11 @@ class Esp32Client:
 
             if pins:
                 for pin in pins:
-                    formatted_strings.append(f"{pin['PIN']}:{pin['STATE']}")
+                    formatted_strings.append(f"{pin['PIN']}:{str(pin['STATE'])}")
 
             if pwms:
                 for pwm in pwms:
-                    formatted_strings.append(f"{pwm['PIN']}:{pwm['PWM']}")
+                    formatted_strings.append(f"{pwm['PIN']}:{str(pwm['PWM'])}")
 
             result_string = "$".join(formatted_strings)
 

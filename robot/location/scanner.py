@@ -115,7 +115,8 @@ class Scanner:
                     self.last_scanned.pop(-1)
 
             if self.debug:
-                print(colored(f"[INFO] Qr code detected {read_qr.get('area_name')}", "green", attrs=["bold"]))
+                print(colored(f"[INFO] Qr code detected {read_qr.get('area_name')}:{read_qr.get('horizontal_coordinate')}:{read_qr.get('vertical_coordinate')}", "green", attrs=["bold"]))
+
                 color = "green" if self.data.get("is_centered")  else "yellow" 
 
                 print(colored(f"[INFO] Centered : {self.data.get('is_centered')}", color, attrs=["bold"]))

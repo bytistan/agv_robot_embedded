@@ -8,9 +8,12 @@ import traceback
 from termcolor import colored
 import time 
 
+from robot.location.direction import Direction
+
 class ProtocolCreator:
     def __init__(self):
         self.data = read_json("./robot/protocol/config.json")
+        self.direction = Direction()
 
     def control(self, d):
         try:
@@ -74,14 +77,13 @@ class ProtocolCreator:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def create(self,data,esp32_client):
+    def create(self, name, data, esp32_client):
         try:
             protocol_handler = ProtocolHandler()
 
             for p in data:
                 move = p.get("move")
                 pwms = p.get("pwms")
-                name = p.get("name")
                 to = p.get("to")
 
                 protocol = Protocol(
@@ -89,7 +91,8 @@ class ProtocolCreator:
                     pwms,
                     self.create_to(to),
                     name,
-                    esp32_client
+                    esp32_client,
+                    self.direction
                 )
 
                 protocol_handler.add(protocol)

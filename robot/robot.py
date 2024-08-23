@@ -8,7 +8,6 @@ from .network.engine_client import Esp32Client
 from .network.sensor_client import SensorListener
 
 from .location.scanner import Scanner
-from .location.direction import Direction
 
 from .settings import *
 
@@ -50,7 +49,6 @@ class Robot_:
             "mission_time":0
         }
         
-        self.direction = Direction()
         self.brain = Brain(self.esp2_client)
 
     def stop(self):
@@ -61,13 +59,11 @@ class Robot_:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-
     def setup(self, mission):
         try:
             self.robot = Robot.filter_one(Robot.id > 0) 
             self.connection = Connection.filter_one(Connection.id > 0)
             self.loop_time = time.time()
-
         except Exception as e:
             self.camera.close()
             error_details = traceback.format_exc()
@@ -96,6 +92,10 @@ class Robot_:
                     break   
                 
                 self.brain.update(self.data)
+                
+                if self.brain.guidance.completed:
+                    print(colored("[INFO] Mission completed.", "yellow", attrs=["bold"]))
+                    break
 
             except KeyboardInterrupt:
                 self.camera.close()

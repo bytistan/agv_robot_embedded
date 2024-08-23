@@ -1,10 +1,9 @@
 import traceback
 from termcolor import colored
 import time 
-from robot.motor import Motor
 
 class Protocol:
-    def __init__(self, move, pwms, protocol_controller, name, esp32_client):
+    def __init__(self, move, pwms, protocol_controller, name, esp32_client, direction):
         self.completed = False
         self.process = False
         
@@ -14,9 +13,8 @@ class Protocol:
         self.name = name
 
         self.esp32_client = esp32_client
+        self.direction = direction
 
-        self.motor = Motor()
-        
     def controller(self, data):
         try:
             result = self.protocol_controller.update(data)
@@ -33,11 +31,12 @@ class Protocol:
     def do(self):
         try:
             if not self.process:
-                # self.motor.stop(self.esp32_client,self.move)
-                # self.motor.start(self.esp32_client,self.pwms,self.move) 
+                self.esp32_client.send(self.move,self.pwms)
+                
+                if self.move in [5,6]:
+                    self.direction.update(self.move) 
 
                 print(colored(f"[MOVE]:[{self.move}]", "yellow", attrs=["bold"]))
-                self.esp32_client.send(self.move,self.pwms)
                 self.process = True 
         except Exception as e:
             error_details = traceback.format_exc()

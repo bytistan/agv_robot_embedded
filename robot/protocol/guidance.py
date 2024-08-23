@@ -3,12 +3,13 @@ from termcolor import colored
 import time 
 
 from models import *
-from location.direction import Direction
+from robot.location.direction import Direction
+from .navigation import Navigation
 
 class Guidance:
-    def __init__(self,mission_id, tolerance):
-        self.navigation = Navigation(mission_id)
-        self.tolerance = tolerance 
+    def __init__(self):
+        self.navigation = Navigation()
+        self.tolerance = 100 
         
         self.reached = {
             "x":False,
@@ -17,6 +18,8 @@ class Guidance:
 
         self.completed = False
         self.flag = False
+
+        self.move = None 
 
     def rest(self):
         try:
@@ -30,7 +33,7 @@ class Guidance:
     def movement_helper(self,location):
         try: 
             tmp = {
-                "x" : 0
+                "x" : 0,
                 "y" : 0
             }
 
@@ -61,21 +64,11 @@ class Guidance:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def create(self,location):
-        try:
-            move = self.movement_helper(location) 
-            
-            print(colored(f"[MOVE]:[{self.move}]", "yellow", attrs=["bold"]))
-
-        except Exception as e:
-            error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
-
     def control(self,location):
         try:
             self.reached["x"] = True if location.get("vertical_coordinate") + self.tolerance > self.navigation.target.vertical_coordinat > location.get("vertical_coordinate") - self.tolerance else False      
 
-            self.reached["y"] = True if location.get("horizontal_coordinate") + self.tolerance > self.navigation.target.horizontal_coordinate > location.get("horizontal_coordinate") - self.tolerance:  
+            self.reached["y"] = True if location.get("horizontal_coordinate") + self.tolerance > self.navigation.target.horizontal_coordinate > location.get("horizontal_coordinate") - self.tolerance else False  
 
             if self.reached["x"] and self.reached["y"]:
                 self.navigation.setup()
@@ -91,6 +84,8 @@ class Guidance:
 
     def update(self,data):
         try:
+            self.navigation.update()
+
             location = data.get("location")
 
             if location is None:
@@ -98,10 +93,8 @@ class Guidance:
                 return
             
             self.control(location)
-            
-            if self.flag:
-                self.do(location)
-                self.flag = False
+
+            self.move = self.movement_helper(location)
 
         except Exception as e:
             error_details = traceback.format_exc()
