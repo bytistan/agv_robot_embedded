@@ -65,6 +65,13 @@ class Guidance:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
+    def clear(self):
+        try:
+            self.move = None
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
     def rest(self):
         try:
             self.reached["x"] = False
@@ -109,13 +116,18 @@ class Guidance:
                        tmp.get("x"), 
                        tmp.get("y")
                    )
-             
+
             if move is None: 
                 # print(colored(f"[WARN] Move is not found.", "red", attrs=["bold"]))
                 return 
+            
+            deb = "left" if move == 5 else "right"
+            
 
-                print(colored(f"[INFO] Move to {move}.", "green", attrs=["bold"]))
+            print(colored(f"[INFO] Move to {deb}.", "blue", attrs=["bold"]))
+
             return move
+
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
@@ -142,6 +154,8 @@ class Guidance:
             self.reached["x"] = True if  l_hc + self.tolerance > d_hc > l_hc - self.tolerance else False      
 
             self.reached["y"] = True if l_vc + self.tolerance > d_vc > l_vc - self.tolerance else False  
+
+            print(self.reached)
 
             if self.reached["x"] and self.reached["y"]:
                 self.rest()
@@ -178,8 +192,9 @@ class Guidance:
             
             self.control(location)
 
-            if (self.reached.get("x") or self.reached.get("y")) and mode.get("turn") is None and self.move is None:
-                self.move = self.movement_finder(location)
+            if mode.get("turn:default") is None and mode.get("turn:or") is None:
+                if (self.reached.get("x") or self.reached.get("y")) and self.move is None:
+                    self.move = self.movement_finder(location)
 
         except Exception as e:
             error_details = traceback.format_exc()

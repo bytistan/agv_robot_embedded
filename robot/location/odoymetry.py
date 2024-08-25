@@ -40,7 +40,8 @@ class Odoymetry:
                 self.debug = True
 
             if location.direction_x != 0: 
-                new_horizontal_coordinate = location.horizontal_coordinate + self.one_move_mm
+
+                new_horizontal_coordinate = location.horizontal_coordinate + (self.one_move_mm * location.direction_x)
 
                 print(colored(f"[INFO] Location updated with odoymetry [X]:{location.horizontal_coordinate}:{new_horizontal_coordinate}.", "green", attrs=["bold"]))
 
@@ -50,7 +51,7 @@ class Odoymetry:
                 )
 
             elif location.direction_y != 0:
-                new_vertical_coordinate = location.vertical_coordinate + self.one_move_mm
+                new_vertical_coordinate = location.vertical_coordinate + (self.one_move_mm * location.direction_y)
 
                 print(colored(f"[INFO] Location updated with odoymetry [Y]:{location.vertical_coordinate}:{new_vertical_coordinate}.", "green", attrs=["bold"]))
 

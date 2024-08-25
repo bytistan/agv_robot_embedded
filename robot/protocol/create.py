@@ -79,6 +79,7 @@ class ProtocolCreator:
 
     def create(self, name, data, esp32_client):
         try:
+
             protocol_handler = ProtocolHandler()
 
             for p in data:
@@ -96,6 +97,8 @@ class ProtocolCreator:
                 )
 
                 protocol_handler.add(protocol)
+
+            print(colored(f"[INFO] Protocol created {name}.", "yellow", attrs=["bold"]))
 
             return protocol_handler
         except Exception as e:

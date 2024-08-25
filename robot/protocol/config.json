@@ -85,7 +85,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "to": {
-          "sleep": 2 
+          "sleep": 1 
         },
         "complated": false,
         "process": false
@@ -118,7 +118,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "to": {
-            "wheel":22
+            "wheel":20
         },
         "complated": false,
         "process": false
@@ -132,7 +132,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "to": {
-          "sleep": 2 
+          "sleep": 1 
         },
         "complated": false,
         "process": false
@@ -165,10 +165,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "to": {
-            "ls":{
-                "1": [25,1],
-                "5": [25,1]
-            }
+            "wheel":20
         },
         "complated": false,
         "process": false
@@ -182,7 +179,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "to": {
-          "sleep": 2 
+          "sleep": 1 
         },
         "complated": false,
         "process": false
@@ -215,10 +212,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "to": {
-            "ls":{
-                "5": [25,1],
-                "7": [25,1]
-            }
+            "wheel":20
         },
         "complated": false,
         "process": false

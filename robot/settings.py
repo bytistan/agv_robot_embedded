@@ -116,12 +116,12 @@ pwms_data= {
 
 destination_data = [
         {
-            "area_name":"S1",
+            "area_name":"S2",
             "horizontal_coordinate":2250.0,
             "vertical_coordinate":0
         },
         {
-            "area_name":"S2",
+            "area_name":"S1",
             "horizontal_coordinate":2250,
             "vertical_coordinate":3000
         },

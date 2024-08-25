@@ -77,8 +77,10 @@ class Brain:
             if self.mode.get(m) is None and protocol is not None:
 
                 tmp = m.split(":")
-                
-                if tmp[0] == "turn" and self.mode.get(m) is None and protocol is not None:
+
+                if tmp[0] == "turn":
+                    # r = True if self.guidance.reached.get("x") or self.guidance.reached.get("y") else False 
+
                     if self.guidance.move is not None:
                         if tmp[1] == "default" and protocol[0].get("move") == self.guidance.move:
                             self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
@@ -86,6 +88,7 @@ class Brain:
                             print(colored(f"[INFO] Robot choose to {self.guidance.move}", "red", attrs=["bold"]))
                             protocol[0]["move"] = self.guidance.move 
                             self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+                        self.guidance.clear()
                 else:
                     self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
 
