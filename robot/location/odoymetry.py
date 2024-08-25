@@ -50,9 +50,9 @@ class Odoymetry:
                 )
 
             elif location.direction_y != 0:
-                new_verical_coordinate = location.vertical_coordinate + self.one_move_mm
+                new_vertical_coordinate = location.vertical_coordinate + self.one_move_mm
 
-                print(colored(f"[INFO] Location updated with odoymetry [Y]:{location.vertical_coordinate}:{new_verical_coordinate}.", "green", attrs=["bold"]))
+                print(colored(f"[INFO] Location updated with odoymetry [Y]:{location.vertical_coordinate}:{new_vertical_coordinate}.", "green", attrs=["bold"]))
 
                 location.update(
                     location.id,

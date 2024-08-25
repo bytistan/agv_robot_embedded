@@ -8,7 +8,7 @@ from .settings import *
 class Direction:
     def __init__(self):
         self.robot = Robot.filter_one(Robot.id > 0)            
-        self.flag = False
+        self.flag = True 
 
     def setup(self):
         try:
@@ -19,6 +19,7 @@ class Direction:
                 direction_x = 1,
                 direction_y = 0
             )
+
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
@@ -34,6 +35,7 @@ class Direction:
                 d = {"name" : "y" ,"going" : location.direction_y}
 
             if d is None:
+                print(colored(f"[INFO] Direction is not found, it gonne be a big problem.", "red", attrs=["bold"]))
                 return
 
             tmp = direction_find_data.get(d.get("name"))
@@ -41,7 +43,7 @@ class Direction:
             tmp = tmp.get(move) 
             return tmp
 
-            print(colored(f"[INFO] Direction is change based turn {new_diretion.ge('x')}:{new_direction.get('y')}", "yellow", attrs=["bold"]))
+            print(colored(f"[INFO] Direction is change based turn {new_diretion.ge('x')}:{new_direction.get('y')}", "blue", attrs=["bold"]))
 
         except Exception as e:
             error_details = traceback.format_exc()
@@ -49,15 +51,15 @@ class Direction:
 
     def update(self,move):
         try:
-            if not self.flag:
-                self.flag = True 
+            if self.flag:
+                self.flag = False 
                 self.setup()
 
             self.setup()        
             location = Location.filter_one(Location.id > 0)
             
             if location is None:
-                print(colored(f"[WARN] Location is not found.", "yellow", attrs=["bold"]))
+                print(colored(f"[WARN] Location is not found.", "red", attrs=["bold"]))
                 return
             
             new_direction = self.find(location,move)
@@ -66,13 +68,15 @@ class Direction:
                 print(colored(f"[WARN] Check direction class.", "red", attrs=["bold"]))
                 return 
             
-            print(colored(f"[INFO] Direction is updated {new_direction.get('x')}:{new_direction.get('y')}.", "green", attrs=["bold"]))
+            else:
+                print(colored(f"[INFO] Direction is updated {new_direction.get('x')}:{new_direction.get('y')}.", "blue", attrs=["bold"]))
 
             location.update(
                 location.id,
-                direction_x = new_direction.get("y"),
-                direction_y = new_direction.get("x")
+                direction_x = new_direction.get("x"),
+                direction_y = new_direction.get("y")
             )
+
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

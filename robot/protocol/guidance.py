@@ -11,7 +11,7 @@ from robot.settings import *
 class Guidance:
     def __init__(self):
         self.navigation = Navigation()
-        self.tolerance = 250 
+        self.tolerance = 100 
         
         self.reached = {
             "x":False,

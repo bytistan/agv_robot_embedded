@@ -10,6 +10,8 @@ class Location(BaseModel):
     id = Column(Integer, primary_key=True)
     mission_id = Column(Integer, ForeignKey("mission.id"))
 
+    move = Column(Integer, default=0)
+
     direction_x = Column(Integer, default=0)
     direction_y = Column(Integer, default=0) 
     

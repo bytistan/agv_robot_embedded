@@ -19,11 +19,15 @@ class ProtocolController:
             self.sleep = to.get("sleep")
             self.wheel = to.get("wheel")
 
+            self.p = to.get("pass")
+
             self.ls_flag = False if self.ls else None
             self.lso_flag = False if self.lso else None
 
             self.wheel_flag = False if self.wheel else None
             self.sleep_flag = False if self.sleep else None 
+
+            self.p_flag = False if self.p else None 
 
             if self.sleep_flag != None:
                 self.target_time = time.time() + self.sleep 
@@ -42,17 +46,20 @@ class ProtocolController:
                 self.setup(self.to)
                 self.flag = True
 
-            if self.ls_flag is not None:
+            elif self.ls_flag is not None:
                 return self.line_controller(data, to)
 
-            if self.lso_flag is not None:
+            elif self.lso_flag is not None:
                 return self.line_controll_or(data, to)
 
-            if self.sleep_flag is not None:
+            elif self.sleep_flag is not None:
                 return self.sleep_controller(data, to) 
             
-            if self.wheel_flag is not None:
+            elif self.wheel_flag is not None:
                 return self.wheel_controller(data, to)
+
+            elif self.p is not None:
+                return True 
 
         except Exception as e:
             error_details = traceback.format_exc()
