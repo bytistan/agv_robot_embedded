@@ -264,7 +264,7 @@
         "to": {
             "lso":{
                 "index":[3,4,5],
-                "bp":50
+                "bp":60
             }
         },
         "completed": false,
@@ -310,7 +310,7 @@
         "to": {
             "lso":{
                 "index":[3,4,5],
-                "bp":50
+                "bp":60
             }
         },
         "completed": false,
@@ -365,7 +365,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "to": {
-          "sleep": 0.01
+          "sleep": 0.05
         },
         "completed": false,
         "process": false
@@ -391,7 +391,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "to": {
-            "sleep":0.1
+            "sleep":0.05
         },
         "completed": false,
         "process": false

@@ -83,6 +83,7 @@ class Brain:
                         if tmp[1] == "default" and protocol[0].get("move") == self.guidance.move:
                             self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
                         elif tmp[1] == "or":
+                            print(colored(f"[INFO] Robot choose to {self.guidance.move}", "red", attrs=["bold"]))
                             protocol[0]["move"] = self.guidance.move 
                             self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
                 else:
