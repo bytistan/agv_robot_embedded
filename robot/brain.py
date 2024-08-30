@@ -5,7 +5,7 @@ import time
 from models import *
 
 from robot.protocol.create import ProtocolCreator 
-from robot.protocol.guidance import Guidance
+from robot.protocol.exception_protocols.guidance import Guidance
 
 from .location.odoymetry import Odoymetry
 
@@ -15,18 +15,16 @@ class Brain:
     def __init__(self,esp2_client):
         self.mode = {
             "guidance":None,
-            "turn:default":None,
-            "turn:or":None,
-            "line_center:default":None,
-            "line_center:pwm":None
+            "turn":None,
+            "line_center":None,
+            "start":None
         }
 
-        self.mode_imp = {
+        self.mode_priority = {
             "guidance":0,
-            "turn:default":3,
-            "turn:or":4,
-            "line_center:default":2,
-            "line_center:pwm":1
+            "turn":2,
+            "line_center":1,
+            "start":3
         }
 
         self.esp2_client = esp2_client
@@ -36,82 +34,124 @@ class Brain:
 
         self.guidance = Guidance()
         self.odoymetry = Odoymetry()
-        
-    def get_location(self):
+
+        self.flag = True 
+
+    def start(self):
         try:
-            location = Location.filter_one(Location.id > 0)
-
-            if location is None:
-                # print(colored(f"[WARN] Location not found in brain.", "yellow", attrs=["bold"]))
-                return
-            
-            return location
-        except:
-            error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
-
-    def find_mode(self):
-        try:
-            # Default mode
-            mode = "guidance"
-            mode_imp_num = self.mode_imp.get(mode)
-
-            for tmp_mode, protocol_handler in self.mode.items():
-                tmp_imp_num = self.mode_imp.get(tmp_mode)
-
-                # Check if the importance number is valid and greater
-                if tmp_imp_num is not None and (mode_imp_num is None or tmp_imp_num > mode_imp_num) and protocol_handler is not None:
-                    mode = tmp_mode
-                    mode_imp_num = tmp_imp_num  # Update current mode importance number
-            
-            return mode
+            protocol = self.protocol_creator.create("start:default",default_protocol.get("forward"), self.esp2_client)
+            self.mode["start"] = protocol 
+            self.flag = False
 
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def update(self,data):
+    def choose_mode(self):
         try:
+            # Default mode
+            default_mode = "guidance"
+
+            # Default priority number
+            default_priority = self.mode_priority.get(default_mode)
+
+            # Look all the modes
+            for mode_name, protocol_handler in self.mode.items(): 
+                # Take the priority number for the current mode
+                current_mode_priority = self.mode_priority.get(mode_name)
+
+                # Check if the priority number is valid and greater
+                if current_mode_priority is not None and current_mode_priority > default_priority and protocol_handler is not None:
+                    default_mode = mode_name
+                    # Update current mode priority number
+                    default_priority = current_mode_priority 
+            
+            return default_mode 
+
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
+    def path_finder(self,data):
+        try: 
+            # Control the condition
             m,protocol = self.protocol_creator.control(data)
             
-            if self.mode.get(m) is None and protocol is not None:
+            if m is not None and protocol is not None:
+                # Check protocol name and type
+                name,tip = m.split(":")
 
-                tmp = m.split(":")
+                # If condition happen
+                if self.mode.get(name) is None:
+                    
+                    if name == "turn":
+                        # If robot want's to turn it's have to be target, here we control that 
+                        move = self.guidance.find_direction(name,tip)
 
-                if tmp[0] == "turn":
-                    # r = True if self.guidance.reached.get("x") or self.guidance.reached.get("y") else False 
+                        # If robot want move 
+                        if move is not None:
 
-                    if self.guidance.move is not None:
-                        if tmp[1] == "default" and protocol[0].get("move") == self.guidance.move:
-                            self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
-                        elif tmp[1] == "or":
-                            print(colored(f"[INFO] Robot choose to {self.guidance.move}", "red", attrs=["bold"]))
-                            protocol[0]["move"] = self.guidance.move 
-                            self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
-                        self.guidance.clear()
-                else:
-                    self.mode[m] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+                            # Check turn type default robot can turn one way  
+                            if tip == "default" and protocol[0].get("move") == move:
+                                self.mode[name] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+                            # Check turn type or robot can turn two way  
+                            elif tip == "or":
+                                # We give them which direction is  
+                                protocol[0]["move"] = move 
+                                # And create the protocol  
+                                self.mode[name] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+                    else:
+                        # Some protocols is reflex protocol like obstacle avoider or line_center, robot have do that  
+                        self.mode[name] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+    
+    def path_controller(self,data):
+        try:
+            m = self.choose_mode() 
 
-            fm = self.find_mode()
-            protocol_handler = self.mode.get(fm) 
-        
-            if fm is not None and protocol_handler is not None:
-                protocol_handler.update(data)  
-            
+            # We choose the have high priority mode 
+            protocol_handler = self.mode.get(m)
+
+            # Some protocols can be none like guidance 
             if protocol_handler is not None:
+                # Update the protocol
+                protocol_handler.update(data)  
+                
+                # If protocol is done, we clear that area
                 if protocol_handler.completed:
-                    self.mode[fm] = None
+                    self.mode[m] = None
 
-                    if fm == "turn":
-                        self.guidance.move = None  
+            # In out table we have one colunm inside location 
+            location = Location.filter_one(Location.id > 0)
             
-            location = self.get_location() 
+            # We can update odoymetry if location is empty 
+            if location is None:
+                print(colored(f"[WARN] Location not found in brain.", "yellow", attrs=["bold"]))
+                return
 
-            if location.move in [1,2] and fm in ["line_center:pwm","guidance"]:
+            # If robot going forward or backward we update the odoymetry 
+            if location.move in [1,2]:
                 self.odoymetry.update(data)
 
-            self.guidance.update(data ,self.mode)
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+    
+    def update(self,data):
+        try:
+            if self.flag:
+                self.start()
 
+            # We follow the order 
+            self.path_finder(data)
+
+            # And control the path 
+            self.path_controller(data)
+
+            # Also we have to check where the robot is 
+            self.guidance.update(data ,self.mode)
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

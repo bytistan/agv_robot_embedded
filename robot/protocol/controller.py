@@ -1,76 +1,32 @@
 from helper.json_helper import read_json
 
-from .do import Protocol
+from .do import ProtocolDo
 
 import traceback
 from termcolor import colored
 import time 
 
 class ProtocolController:
-    def __init__(self, to):
-        self.to = to
-        self.flag = False
-                
-    def setup(self, to):
-        try:
-            self.ls = to.get("ls")
-            self.lso = to.get("lso")
+    def __init__(self, tip, condition):
+        self.tip = tip 
+        self.condition = condition 
 
-            self.sleep = to.get("sleep")
-            self.wheel = to.get("wheel")
+        self.controller_data = {
+            "line_status:default":lambda data, condition: self.line_tracking(data, condition), 
+            "line_status:or":lambda data, condition: self.line_tracking_average(data, condition),
+            "wheel:default":lambda data, condition: self.wheel_counter(data, condition),
+            "pass:default":lambda data, condition: self.pass_(data, condition),
+            "sleep:default":lambda data, condition: self.sleep_counter(data, condition),
+        }
 
-            self.p = to.get("pass")
-
-            self.ls_flag = False if self.ls else None
-            self.lso_flag = False if self.lso else None
-
-            self.wheel_flag = False if self.wheel else None
-            self.sleep_flag = False if self.sleep else None 
-
-            self.p_flag = False if self.p else None 
-
-            if self.sleep_flag != None:
-                self.target_time = time.time() + self.sleep 
-
-            if self.wheel:
-                self.counter_flag = False
-                self.count = 0
-
-        except Exception as e:
-            error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
-    
-    def control(self, data ,to):
-        try: 
-            if not self.flag:
-                self.setup(self.to)
-                self.flag = True
-
-            elif self.ls_flag is not None:
-                return self.line_controller(data, to)
-
-            elif self.lso_flag is not None:
-                return self.line_controll_or(data, to)
-
-            elif self.sleep_flag is not None:
-                return self.sleep_controller(data, to) 
+        self.flag = True 
             
-            elif self.wheel_flag is not None:
-                return self.wheel_controller(data, to)
-
-            elif self.p is not None:
-                return True 
-
-        except Exception as e:
-            error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
-            
-    def line_controll_or(self, data, to):
+    def line_tracking_average(self, data, condition):
         try:
             cam_data = data.get("line_status")
-
-            index = self.lso.get("index")
-            black_percent = self.lso.get("bp") 
+            
+            index = condition.get("index")
+            black_percent = condition.get("bp") 
             
             if index is None or black_percent is None:
                 print(colored(f"[WARN] Line percent controller, invalid data check config.json", "yellow", attrs=["bold"]))
@@ -83,12 +39,12 @@ class ProtocolController:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def line_controller(self, data, to):
+    def line_tracking(self, data, condition):
         try:
             cam_data = data.get("line_status")
             flag = True
 
-            for key,item in self.ls.items():  
+            for key,item in condition.items():  
                 
                 index = key 
 
@@ -105,8 +61,12 @@ class ProtocolController:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
             
-    def sleep_controller(self, data, to):
+    def sleep_counter(self, data, condition):
         try:
+            if self.flag:
+                self.target_time = time.time() + condition 
+                self.flag = False
+
             current_time = time.time() 
             # print(colored(f"[INFO] {current_time},{self.target_time}", "yellow", attrs=["bold"]))
             if current_time > self.target_time:
@@ -116,8 +76,13 @@ class ProtocolController:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def wheel_controller(self, data, to):
+    def wheel_counter(self, data, condition):
         try:
+            if self.flag:
+                self.counter_flag = False
+                self.count = 0
+                self.flag = False
+
             d = data.get("distance_status")
             # print(colored(f"[INFO] {self.count},{d.get('d1')}", "yellow", attrs=["bold"]))
             
@@ -128,16 +93,29 @@ class ProtocolController:
                 self.count += 1
                 self.counter_flag = False
 
-            if self.count >= int(self.wheel):
+            if self.count >= int(condition):
                 return True
 
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def update(self,data):
+    def pass_(self, data, condition):
+        try:
+            return True
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
+    def update(self, data):
         try: 
-            return self.control(data ,self.to)
+            function = self.controller_data.get(self.tip) 
+        
+            if function is not None:
+                return function(data, self.condition)
+            else:
+                print(colored(f"[WARN] Controller doesn't found this type [to].", "red", attrs=["bold"]))
+                return True
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

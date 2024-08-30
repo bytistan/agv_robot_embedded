@@ -3,8 +3,9 @@ from termcolor import colored
 import time 
 
 from models import *
+
 from robot.location.direction import Direction
-from .navigation import Navigation
+from robot.location.navigation import Navigation
 
 from robot.settings import *
 
@@ -20,8 +21,6 @@ class Guidance:
 
         self.completed = False
         self.flag = False
-
-        self.move = None 
 
     def which(self, location, x, y):
         try:
@@ -65,13 +64,6 @@ class Guidance:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def clear(self):
-        try:
-            self.move = None
-        except Exception as e:
-            error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
-
     def rest(self):
         try:
             self.reached["x"] = False
@@ -80,32 +72,38 @@ class Guidance:
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
-
-    def movement_finder(self, location):
+    
+    def find_direction(self, p_name, p_type):
         try: 
-            tmp = {
-                "x" : 0,
-                "y" : 0
-            }
-            
             area_name = self.navigation.destination.area_name
             
             dest = self.find_destination_coordinate(area_name)
 
             if dest is None:
-                print(colored(f"[WARN] Invalid data guidance not found coordinate.", "yellow", attrs=["bold"]))
+                print(colored(f"[WARN] Invalid data guidance not found {area_name}.", "yellow", attrs=["bold"]))
                 return 
 
             d_vc = dest.get("vertical_coordinate")
             d_hc = dest.get("horizontal_coordinate")
 
-            if location.direction_x != 0 and self.reached.get("x"):
+            tmp = {
+                "x" : 0,
+                "y" : 0
+            }
+
+            location = Location.filter_one(Location.id > 0)
+            
+            if location is None:
+                print(colored(f"[WARN] Location is not found.", "yellow", attrs=["bold"]))
+                return
+            
+            if location.direction_x != 0:
                 if location.vertical_coordinate > d_vc:
                     tmp["y"] = -1
                 elif location.vertical_coordinate < d_vc:
                     tmp["y"] = 1
 
-            elif location.direction_y != 0 and self.reached.get("y"):
+            elif location.direction_y != 0:
                 if location.horizontal_coordinate > d_hc:
                     tmp["x"] = -1
                 elif location.horizontal_coordinate < d_hc:
@@ -116,17 +114,19 @@ class Guidance:
                        tmp.get("x"), 
                        tmp.get("y")
                    )
-
-            if move is None: 
-                # print(colored(f"[WARN] Move is not found.", "red", attrs=["bold"]))
-                return 
             
             deb = "left" if move == 5 else "right"
             
-
-            print(colored(f"[INFO] Move to {deb}.", "blue", attrs=["bold"]))
-
-            return move
+            if p_type == "or":                
+                print(colored(f"[INFO] Move to {deb}.", "blue", attrs=["bold"]))
+                return move
+            elif p_type == "default":
+                if location.direction_x != 0 and self.reached.get("x"):
+                    print(colored(f"[INFO] Move to {deb}.", "blue", attrs=["bold"]))
+                    return move
+                elif location.direction_y != 0 and self.reached.get("y"):
+                    print(colored(f"[INFO] Move to {deb}.", "blue", attrs=["bold"]))
+                    return move
 
         except Exception as e:
             error_details = traceback.format_exc()
@@ -151,13 +151,15 @@ class Guidance:
             l_vc = location.vertical_coordinate
             l_hc = location.horizontal_coordinate
 
+
             self.reached["x"] = True if  l_hc + self.tolerance > d_hc > l_hc - self.tolerance else False      
 
             self.reached["y"] = True if l_vc + self.tolerance > d_vc > l_vc - self.tolerance else False  
 
-            print(self.reached)
-
             if self.reached["x"] and self.reached["y"]:
+
+                area_name = self.navigation.destination.area_name
+                
                 self.rest()
                 self.flag = True
 
@@ -167,10 +169,9 @@ class Guidance:
                     reached = True
                 )
 
-                area_name = self.navigation.destination.area_name
 
                 self.navigation.update()
-                print(colored(f"[WARN] Reached the destination area {area_name}.", "blue", attrs=["bold"]))
+                print(colored(f"[WARN] Reached the destination area coordinate.", "blue", attrs=["bold"]))
 
             if self.navigation.destination is None:
                 self.completed = True
@@ -191,11 +192,6 @@ class Guidance:
                 return
             
             self.control(location)
-
-            if mode.get("turn:default") is None and mode.get("turn:or") is None:
-                if (self.reached.get("x") or self.reached.get("y")) and self.move is None:
-                    self.move = self.movement_finder(location)
-
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

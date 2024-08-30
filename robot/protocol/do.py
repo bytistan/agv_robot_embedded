@@ -4,13 +4,14 @@ import time
 
 from models import *
 
-class Protocol:
+class ProtocolDo:
     def __init__(self, move, pwms, protocol_controller, name, esp32_client, direction):
         self.completed = False
         self.process = False
         
         self.move = move
         self.pwms = pwms 
+
         self.protocol_controller = protocol_controller
         self.name = name
 
@@ -45,7 +46,7 @@ class Protocol:
                     move = self.move
                 )
                 
-                # print(colored(f"[INFO] Move update to {self.move}.", "yellow", attrs=["bold"]))
+                print(colored(f"[INFO] Robot moving to {self.move}.", "yellow", attrs=["bold"]))
                 mode = self.name.split(":")
 
                 if len(mode) > 1 and mode[0] == "turn" and self.move in [5,6]:

@@ -1,6 +1,6 @@
 from helper.json_helper import read_json
 
-from .do import Protocol
+from .do import ProtocolDo
 from .handler import ProtocolHandler
 from .controller import ProtocolController
 
@@ -12,15 +12,15 @@ from robot.location.direction import Direction
 
 class ProtocolCreator:
     def __init__(self):
-        self.data = read_json("./robot/protocol/config.json")
+        self.data = read_json("./robot/protocol/resources/config.json")
         self.direction = Direction()
 
-    def control(self, d):
+    def control(self, data):
         try:
-            ls = d.get("line_status")
-            ds = d.get("distance_status")
+            line_status = data.get("line_status")
+            distance_status = data.get("distance_status")
 
-            r = self.check_ls(ls)
+            r = self.control_line_status(line_status)
             
             if r is not None:
                 name, protocol= r[0], r[1]
@@ -31,14 +31,14 @@ class ProtocolCreator:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def check_ds(self,ds):
+    def control_distance(self,distances):
         try:
             pass
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
             
-    def check_ls(self,ls): 
+    def control_line_status(self,line_status): 
         try:
             for entry in self.data:
                 fi = entry.get("fi") 
@@ -47,56 +47,52 @@ class ProtocolCreator:
                     print(colored(f"[WARN] Fi not found, check protocol/config.json", "yellow", attrs=["bold"]))
                     return
 
-                fi_ls = fi.get("ls")
-                  
+                fi_line_status = fi.get("line_status")
+
                 protocol = entry.get("protocol")
                 name = entry.get("name")
                 
                 flag = True
 
-                for fi_key,fi_item in fi_ls.items():
+                for fi_key,fi_item in fi_line_status.items():
                     per = fi_item[0]
                     state = fi_item[1]
 
-                    if state == 1 and per > ls.get(str(fi_key)):
+                    if state == 1 and per > line_status.get(str(fi_key)):
                         flag = False
-                    if state == 0 and per < ls.get(str(fi_key)): 
+                    if state == 0 and per < line_status.get(str(fi_key)): 
                         flag = False
+
                 if flag:
                     return (name,protocol)
-        except Exception as e:
-            error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def create_to(self,to):
-        try:
-            protocol_controller = ProtocolController(to)
-
-            return protocol_controller
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def create(self, name, data, esp32_client):
         try:
-
             protocol_handler = ProtocolHandler()
 
             for p in data:
                 move = p.get("move")
                 pwms = p.get("pwms")
-                to = p.get("to")
 
-                protocol = Protocol(
+                tip = p.get("tip") 
+                condition = p.get("condition")
+
+                controller = ProtocolController(tip, condition)
+
+                protocol_do = ProtocolDo(
                     move,
                     pwms,
-                    self.create_to(to),
+                    controller,
                     name,
                     esp32_client,
                     self.direction
                 )
 
-                protocol_handler.add(protocol)
+                protocol_handler.add(protocol_do)
 
             print(colored(f"[INFO] Protocol created {name}.", "yellow", attrs=["bold"]))
 

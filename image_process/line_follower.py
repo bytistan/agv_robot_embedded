@@ -128,7 +128,7 @@ class LineFollower:
                 black_ratio_percent = self.process(frame)
                 data[str(region_number)] = int(black_ratio_percent)
 
-                if region_number == 5:
+                if region_number == 3:
                     data.update(self.one_square_col_process(frame,region_number))
               
             return data

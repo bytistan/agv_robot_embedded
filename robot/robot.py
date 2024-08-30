@@ -24,7 +24,7 @@ class Robot_:
         self.tolerance = 100 
 
         self.esp2_client = Esp32Client("ws://10.100.68.75:80")
-        self.sensor_listener = SensorListener("ws://10.100.68.74:80")
+        self.sensor_listener = SensorListener("ws://10.100.68.66:80")
 
         self.camera = Camera()
         self.line_follower = LineFollower()
@@ -51,39 +51,40 @@ class Robot_:
         
         self.brain = Brain(self.esp2_client)
 
-    def stop(self):
-        try:
-            self.camera.close()
-        except Exception as e:
-            self.camera.close()
-            error_details = traceback.format_exc()
-            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def setup(self, mission):
         try:
+            # We are take the some information
             self.robot = Robot.filter_one(Robot.id > 0) 
             self.connection = Connection.filter_one(Connection.id > 0)
             self.loop_time = time.time()
+
+            # And set the mission
             self.mission = mission
 
+            # Set the default robot location
             location = Location.filter_one(Location.id > 0)
             
+            # If location is not created, create one
             if location is None:
                 Location.create(
                     mission_id = mission.id,
                     vertical_coordinate = 0.0,
                     horizontal_coordinate = 0.0,
-                    direction_x = 1,
-                    direction_y = 0
+                    direction_x = 1, # We have to set direction
+                    direction_y = 0, # Because we are not using helper sensor for that 
+                    move = 1
                 )
                 print(colored(f"[INFO] Location is setup.", "green", attrs=["bold"]))
+            # Robot have already location, we just updated that
             else:
                 location.update(
                     location.id,
                     vertical_coordinate = 0.0,
                     horizontal_coordinate = 0.0,
                     direction_x = 1,
-                    direction_y = 0
+                    direction_y = 0,
+                    move = 1
                 )
 
         except Exception as e:
@@ -94,33 +95,36 @@ class Robot_:
     def run(self, mission):
         self.setup(mission)
 
-        self.esp2_client.send(
-            1,
-            pwms_data.get(1)
-        )
-
         while True:
             try:
+                # We get the frame
                 frame = self.camera.capture_frame()
-                    
+                
+                # If we have camera issue, we can't do anything that reason, we break the loop
+                if frame is None:
+                    print(colored("[WARN] Camera is not working.", "red", attrs=["bold"]))
+                    break   
+
+                # Search the qr code 
                 self.scanner.update(frame)
                 
+                # Set the all information coming from sensors
                 self.data["distance_status"] = self.sensor_listener.data.get("distance")
                 self.data["line_status"] = self.line_follower.update(frame)
                 self.data["scanned"] = self.scanner.data
-
-                if frame is None:
-                    print(colored("[WARN] Camera is not working.", "yellow", attrs=["bold"]))
-                    break   
                 
+                # Update the brain, brain is control the robot
                 self.brain.update(self.data)
-                
+               
+                # Mission is completed ? 
                 if self.brain.guidance.completed:
+                    # We directly stop the motor 
                     self.esp2_client.send(
                         0,
                         pwms_data.get(0)
                     )
-
+                    
+                    # And update the mission inactive,completed
                     Mission.update(
                         self.mission.id,
                         is_active = False,
@@ -130,13 +134,20 @@ class Robot_:
                     print(colored("[INFO] Mission completed.", "yellow", attrs=["bold"]))
                     break
 
+            # If user close the program 
             except KeyboardInterrupt:
                 print(colored(f"Bye :)", "green", attrs=["bold"]))
+                # Close the connection
                 self.esp2_client.close()
+                # Same again
                 self.sensor_listener.close()
+                # Close the cam
                 self.camera.close()
+                # Exit from program
                 sys.exit()
                 break 
+            
+            # Exactly same upper, just we catch the error here
             except Exception as e:
                 self.esp2_client.close()
                 self.sensor_listener.close()
@@ -145,5 +156,3 @@ class Robot_:
                 print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
                 sys.exit()
                 break
-
-        self.stop() 

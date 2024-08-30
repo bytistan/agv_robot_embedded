@@ -166,3 +166,22 @@ destination_data = [
             "vertical_coordinate":0
         }
 ]
+
+default_protocol = { 
+    "forward": [
+        {
+            "move": 1,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":225},
+                {"PIN":"NE_PWM","PWM":225},
+                {"PIN":"SW_PWM","PWM":225},
+                {"PIN":"SE_PWM","PWM":225}
+            ],
+            "to": {
+                "pass:default":True
+            },
+            "completed": False,
+            "process": False
+        }
+    ]
+}
