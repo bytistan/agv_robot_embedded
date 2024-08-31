@@ -17,15 +17,17 @@ class Odoymetry:
 
     def update(self,data):
         try:
-            d = data.get("distance_status")  
+            distance_status = data.get("distance_status")  
+            
+            mz80 = distance_status.get("mz80")
 
-            if d is None:
+            if mz80 is None:
                 return
             
-            if int(d.get("d1")) == 1 and not self.counter_flag:
+            if int(mz80.get("d1")) == 1 and not self.counter_flag:
                 self.counter_flag = True
            
-            if self.counter_flag and int(d.get("d1")) == 0:
+            if self.counter_flag and int(mz80.get("d1")) == 0:
                 self.counter_flag = False
 
                 location = Location.filter_one(Location.id > 0)
@@ -37,8 +39,9 @@ class Odoymetry:
                     return
                 else:
                     self.debug = True
+                
 
-                if location.direction_x != 0: 
+                if location.direction_x != 0 and (4500 > location.horizontal_coordinate > 0): 
 
                     new_horizontal_coordinate = location.horizontal_coordinate + (self.one_move_mm * location.direction_x)
 
@@ -49,7 +52,7 @@ class Odoymetry:
                         horizontal_coordinate = new_horizontal_coordinate   
                     )
 
-                elif location.direction_y != 0:
+                elif location.direction_y != 0 and (3000 > location.vertical_coordinate > 0):
                     new_vertical_coordinate = location.vertical_coordinate + (self.one_move_mm * location.direction_y)
 
                     print(colored(f"[INFO] Location updated with odoymetry [Y]:{location.vertical_coordinate}:{new_vertical_coordinate}.", "green", attrs=["bold"]))

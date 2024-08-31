@@ -168,7 +168,7 @@ class Guidance:
 
                 verification = False
 
-                if area_name in [1,2,3,4]:
+                if area_name in ["1","2","3","4"]:
                     verification = True
                 elif area_name == scanned_area_equivalent:
                     verification = True

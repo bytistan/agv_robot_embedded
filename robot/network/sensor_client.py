@@ -12,8 +12,24 @@ class SensorListener:
         self.ws = None
         self.connect()
         self.data = None
+
+        self.counter_flag = False
         self.count = 0
-        self.flag = False  
+
+    def wheel_counter(self, data):
+        try:
+            d = data.get("distance")
+            # print(colored(f"[INFO] {self.count},{d.get('d1')}", "yellow", attrs=["bold"]))
+            
+            if int(d.get("d1")) == 1:
+                self.counter_flag = True
+           
+            if self.counter_flag and int(d.get("d1")) == 0:
+                self.count += 1
+                self.counter_flag = False
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
 
     def connect(self):
         try:
@@ -33,6 +49,7 @@ class SensorListener:
     def on_message(self, ws, message):
         try:
             self.data = json.loads(message)
+            self.wheel_counter(self.data)
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))

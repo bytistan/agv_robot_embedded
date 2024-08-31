@@ -18,10 +18,11 @@ import traceback
 import sys 
 
 from termcolor import colored
+import json
 
 class Robot_:
     def __init__(self):
-        self.tolerance = 300 
+        self.tolerance = 500 
 
         self.esp2_client = Esp32Client("ws://10.100.68.75:80")
         self.sensor_listener = SensorListener("ws://10.100.68.66:80")
@@ -31,9 +32,9 @@ class Robot_:
         self.scanner = Scanner(self.tolerance)
 
         self.data = {
-            "line_status":None,
-            "distance_status":None,
-            "qr_data":None
+            "line_status":{},
+            "distance_status":{},
+            "qr_data":{}
         }
         
         self.start_time = time.time()
@@ -61,6 +62,16 @@ class Robot_:
 
             # And set the mission
             self.mission = mission
+            
+            # Take information from config
+            with open("config.json", "r") as json_file:
+                config_data = json.load(json_file)
+            
+            direction_data = config_data.get("direction") 
+            
+            if direction_data is None or direction_data.get("x") is None or direction_data.get("y") is None:
+                print(colored(f"[WARN] Invalid direction data from config.json file.", "yellow", attrs=["bold"]))
+                return
 
             # Set the default robot location
             location = Location.filter_one(Location.id > 0)
@@ -71,8 +82,8 @@ class Robot_:
                     mission_id = mission.id,
                     vertical_coordinate = 0.0,
                     horizontal_coordinate = 0.0,
-                    direction_x = -1, # We have to set direction
-                    direction_y = 0, # Because we are not using helper sensor for that 
+                    direction_x = direction_data.get("x"), # We have to set direction
+                    direction_y = direction_data.get("y"), # Because we are not using helper sensor for that 
                     move = 1
                 )
                 print(colored(f"[INFO] Location is setup.", "green", attrs=["bold"]))
@@ -82,8 +93,8 @@ class Robot_:
                     location.id,
                     vertical_coordinate = 0.0,
                     horizontal_coordinate = 0.0,
-                    direction_x = -1,
-                    direction_y = 0,
+                    direction_x = direction_data.get("x"),
+                    direction_y = direction_data.get("y"),
                     move = 1
                 )
 
@@ -109,7 +120,10 @@ class Robot_:
                 self.scanner.update(frame)
                 
                 # Set the all information coming from sensors
-                self.data["distance_status"] = self.sensor_listener.data.get("distance")
+                self.data["distance_status"]["mz80"] = self.sensor_listener.data.get("distance")
+
+                self.data["distance_status"]["count"] = self.sensor_listener.count
+
                 self.data["line_status"] = self.line_follower.update(frame)
                 self.data["scanned"] = self.scanner.data
                 

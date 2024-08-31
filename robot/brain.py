@@ -88,11 +88,15 @@ class Brain:
                         # If robot want's to turn it's have to be target, here we control that 
                         move = self.guidance.find_direction(name,tip)
 
+                        if tip == "corner":
+                            self.mode[name] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+
                         # If robot want move 
-                        if move is not None:
+                        elif move is not None:
 
                             # Check turn type default robot can turn one way  
-                            if tip in ["default","corner"] and protocol[0].get("move") == move:
+
+                            if tip == "default" and protocol[0].get("move") == move:
                                 self.mode[name] = self.protocol_creator.create(m,protocol,self.esp2_client) 
                             # Check turn type or robot can turn two way  
                             elif tip == "or":

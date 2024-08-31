@@ -76,24 +76,21 @@ class ProtocolController:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
+
+
     def wheel_counter(self, data, condition):
         try:
+            d = data.get("distance_status")
+
+            count = d.get("count")
+
             if self.flag:
-                self.counter_flag = False
-                self.count = 0
+                self.make_zero = count
                 self.flag = False
 
-            d = data.get("distance_status")
             # print(colored(f"[INFO] {self.count},{d.get('d1')}", "yellow", attrs=["bold"]))
-            
-            if int(d.get("d1")) == 1:
-                self.counter_flag = True
-           
-            if self.counter_flag and int(d.get("d1")) == 0:
-                self.count += 1
-                self.counter_flag = False
 
-            if self.count >= int(condition):
+            if count - self.make_zero >= int(condition):
                 return True
 
         except Exception as e:
