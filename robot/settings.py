@@ -1,3 +1,12 @@
+QR_EQUIVALENT = {
+    "S2":"Q7",
+    "S1":"Q22",
+    "A":"Q50",
+    "B":"Q45",
+    "C":"Q38",
+    "D":"Q33"
+}
+
 pins_data = {
     # STOP
     0:[

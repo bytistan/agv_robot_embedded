@@ -132,7 +132,7 @@ class Guidance:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def control(self, location):
+    def control(self, location, data):
         try:
             if self.navigation.destination is None:
                 self.completed = True
@@ -157,9 +157,22 @@ class Guidance:
             self.reached["y"] = True if l_vc + self.tolerance > d_vc > l_vc - self.tolerance else False  
 
             if self.reached["x"] and self.reached["y"]:
+                qr_data = data.get("scanned") 
+                scanned_area_name = qr_data.get("area_name")
+                scanned_area_equivalent = QR_EQUIVALENT.get(scanned_area_name)
 
                 area_name = self.navigation.destination.area_name
                 
+                if area_name is None or scanned_area_equivalent is None:
+                    print(colored(f"[WARN] Reached the destination, but area name is none.", "yellow", attrs=["bold"]))
+
+                verification = False
+
+                if area_name in [1,2,3,4]:
+                    verification = True
+                elif area_name == scanned_area_equivalent:
+                    verification = True
+                    
                 self.rest()
                 self.flag = True
 
@@ -191,7 +204,7 @@ class Guidance:
                 print(colored(f"[WARN] Location is not found.", "yellow", attrs=["bold"]))
                 return
             
-            self.control(location)
+            self.control(location, data)
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

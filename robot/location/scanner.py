@@ -32,9 +32,9 @@ class Scanner:
                 print(colored(f"[WARN] Invalid data check parent function.", "yellow", attrs=["bold"]))
                 return 
 
-            area_name=data.get("area_name")
-            vertical_coordinate=data.get("vertical_coordinate")
-            horizontal_coordinate=data.get("horizontal_coordinate")
+            area_name = data.get("area_name")
+            vertical_coordinate = data.get("vertical_coordinate")
+            horizontal_coordinate = data.get("horizontal_coordinate")
 
             is_qr = QRCode.filter_one(QRCode.area_name==area_name)
 

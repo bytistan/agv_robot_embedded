@@ -21,7 +21,7 @@ from termcolor import colored
 
 class Robot_:
     def __init__(self):
-        self.tolerance = 100 
+        self.tolerance = 300 
 
         self.esp2_client = Esp32Client("ws://10.100.68.75:80")
         self.sensor_listener = SensorListener("ws://10.100.68.66:80")
@@ -71,7 +71,7 @@ class Robot_:
                     mission_id = mission.id,
                     vertical_coordinate = 0.0,
                     horizontal_coordinate = 0.0,
-                    direction_x = 1, # We have to set direction
+                    direction_x = -1, # We have to set direction
                     direction_y = 0, # Because we are not using helper sensor for that 
                     move = 1
                 )
@@ -82,7 +82,7 @@ class Robot_:
                     location.id,
                     vertical_coordinate = 0.0,
                     horizontal_coordinate = 0.0,
-                    direction_x = 1,
+                    direction_x = -1,
                     direction_y = 0,
                     move = 1
                 )
