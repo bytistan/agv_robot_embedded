@@ -177,6 +177,21 @@ destination_data = [
 ]
 
 default_protocol = { 
+    "stop": [
+        {
+            "move": 0,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":0},
+                {"PIN":"NE_PWM","PWM":0},
+                {"PIN":"SW_PWM","PWM":0},
+                {"PIN":"SE_PWM","PWM":0}
+            ],
+            "tip": "pass:default",
+            "condition": True,
+            "completed": False,
+            "process": False
+        }
+    ],
     "forward": [
         {
             "move": 1,
@@ -186,11 +201,131 @@ default_protocol = {
                 {"PIN":"SW_PWM","PWM":225},
                 {"PIN":"SE_PWM","PWM":225}
             ],
-            "to": {
-                "pass:default":True
-            },
+            "tip": "pass:default",
+            "condition": True,
             "completed": False,
             "process": False
         }
-    ]
+    ],
+    "obstacle_pass": [
+        {
+            "move": 4,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":225},
+                {"PIN":"NE_PWM","PWM":225},
+                {"PIN":"SW_PWM","PWM":225},
+                {"PIN":"SE_PWM","PWM":225}
+            ],
+            "tip":"distance:default",
+            "condition":{
+                "pin":"d14",
+                "state":1
+            },
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 4,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":225},
+                {"PIN":"NE_PWM","PWM":225},
+                {"PIN":"SW_PWM","PWM":225},
+                {"PIN":"SE_PWM","PWM":225}
+            ],
+            "tip":"sleep:default",
+            "condition":3.5,
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 1,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":225},
+                {"PIN":"NE_PWM","PWM":225},
+                {"PIN":"SW_PWM","PWM":225},
+                {"PIN":"SE_PWM","PWM":225}
+            ],
+            "tip":"distance:default",
+            "condition":{
+                "pin":"d13",
+                "state":0
+            },
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 1,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":225},
+                {"PIN":"NE_PWM","PWM":225},
+                {"PIN":"SW_PWM","PWM":225},
+                {"PIN":"SE_PWM","PWM":225}
+            ],
+            "tip":"distance:default",
+            "condition":{
+                "pin":"d13",
+                "state":1
+            },
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 1,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":225},
+                {"PIN":"NE_PWM","PWM":225},
+                {"PIN":"SW_PWM","PWM":225},
+                {"PIN":"SE_PWM","PWM":225}
+            ],
+            "tip":"sleep:default",
+            "condition":1.5,
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 3,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":225},
+                {"PIN":"NE_PWM","PWM":225},
+                {"PIN":"SW_PWM","PWM":225},
+                {"PIN":"SE_PWM","PWM":225}
+            ],
+            "tip":"distance:default",
+            "condition":{
+                "pin":"d15",
+                "state":0
+            },
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 3,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":225},
+                {"PIN":"NE_PWM","PWM":225},
+                {"PIN":"SW_PWM","PWM":225},
+                {"PIN":"SE_PWM","PWM":225}
+            ],
+            "tip": "line_status:or",
+            "condition":{
+                "index":[3,4,5],
+                "bp":50
+            },
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 1,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":225},
+                {"PIN":"NE_PWM","PWM":225},
+                {"PIN":"SW_PWM","PWM":225},
+                {"PIN":"SE_PWM","PWM":225}
+            ],
+            "tip":"pass:default",
+            "condition":True,
+            "completed": False,
+            "process": False
+        }
+    ] 
 }

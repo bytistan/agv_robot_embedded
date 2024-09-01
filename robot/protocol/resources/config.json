@@ -17,7 +17,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "tip": "wheel:default",
-        "condition": 32, 
+        "condition": 30, 
         "complated": false,
         "process": false
       },
@@ -62,7 +62,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "tip":"wheel:default",
-        "condition": 32,
+        "condition": 30,
         "complated": false,
         "process": false
       },
@@ -107,7 +107,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "tip":"wheel:default",
-        "condition": 32, 
+        "condition": 30, 
         "complated": false,
         "process": false
       },
@@ -152,7 +152,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "tip": "wheel:default",
-        "condition": 32, 
+        "condition": 30, 
         "complated": false,
         "process": false
       },
@@ -197,7 +197,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "tip":"wheel:default",
-        "condition": 32, 
+        "condition": 30, 
         "complated": false,
         "process": false
       },
@@ -219,9 +219,9 @@
   {
     "fi": {
         "line_status":{
-            "0": [10,1],
+            "0": [15,1],
 
-            "2": [10,1],
+            "2": [15,1],
 
             "6": [25,0],
             "7": [25,0],
@@ -233,10 +233,10 @@
       {
         "move": 4,
         "pwms": [
-            {"PIN":"NW_PWM","PWM":175},
-            {"PIN":"NE_PWM","PWM":175},
-            {"PIN":"SW_PWM","PWM":175},
-            {"PIN":"SE_PWM","PWM":175}
+            {"PIN":"NW_PWM","PWM":200},
+            {"PIN":"NE_PWM","PWM":200},
+            {"PIN":"SW_PWM","PWM":200},
+            {"PIN":"SE_PWM","PWM":200}
         ],
         "tip": "line_status:or",
         "condition": {
@@ -268,8 +268,8 @@
             "1": [25,0],
             "2": [25,0],
 
-            "6": [10,1],
-            "8": [10,1] 
+            "6": [15,1],
+            "8": [15,1] 
         }
     },
     "name": "line_center:default",
@@ -277,10 +277,10 @@
       {
         "move": 3,
         "pwms": [
-            {"PIN":"NW_PWM","PWM":175},
-            {"PIN":"NE_PWM","PWM":175},
-            {"PIN":"SW_PWM","PWM":175},
-            {"PIN":"SE_PWM","PWM":175}
+            {"PIN":"NW_PWM","PWM":200},
+            {"PIN":"NE_PWM","PWM":200},
+            {"PIN":"SW_PWM","PWM":200},
+            {"PIN":"SE_PWM","PWM":200}
         ],
         "tip": "line_status:or",
         "condition":{
@@ -298,8 +298,8 @@
             {"PIN":"SW_PWM","PWM":225},
             {"PIN":"SE_PWM","PWM":225}
         ],
-        "tip": "sleep:default",
-        "condition": 0.01,
+        "tip": "pass:default",
+        "condition": true,
         "completed": false,
         "process": false
       }
@@ -308,9 +308,9 @@
   {
     "fi": {
         "line_status":{
-            "0": [25,0],
-            "3": [50,0],
-            "2": [25,1]
+            "0": [25,1],
+            "2": [25,0],
+            "3": [50,0]
         }
     },
     "name": "line_center:default",
@@ -347,8 +347,8 @@
     "fi": {
         "line_status":{
             "6": [25,1],
-            "3": [50,0],
-            "8": [25,0]
+            "8": [25,0],
+            "3": [50,0]
         }
     },
     "name": "line_center:default",
@@ -385,7 +385,7 @@
     "fi": {
         "line_status":{
             "3:1": [85,1],
-            "3:2": [50,1]
+            "3:2": [75,1]
         }
     },
     "name": "line_center:pwm",
@@ -399,7 +399,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "tip": "sleep:default",
-        "condition":0.25,
+        "condition":0.15,
         "completed": false,
         "process": false
       },
@@ -411,8 +411,8 @@
             {"PIN":"SW_PWM","PWM":225},
             {"PIN":"SE_PWM","PWM":225}
         ],
-        "tip": "sleep:default",
-        "condition": 0.01, 
+        "tip": "pass:default",
+        "condition": true, 
         "completed": false,
         "process": false
       }
@@ -422,7 +422,7 @@
     "fi": {
         "line_status":{
             "3:1": [85,1],
-            "3:0": [50,1]
+            "3:0": [75,1]
         }
     },
     "name": "line_center:pwm",
@@ -436,7 +436,7 @@
             {"PIN":"SE_PWM","PWM":200}
         ],
         "tip": "sleep:default",
-        "condition":0.25,
+        "condition":0.15,
         "completed": false,
         "process": false
       },
@@ -448,8 +448,8 @@
             {"PIN":"SW_PWM","PWM":225},
             {"PIN":"SE_PWM","PWM":225}
         ],
-        "tip": "sleep:default",
-        "condition":0.01,
+        "tip": "pass:default",
+        "condition":true,
         "completed": false,
         "process": false
       }

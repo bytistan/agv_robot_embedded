@@ -8,8 +8,8 @@ from threading import Thread
 from models import *
 
 class Scanner:
-    def __init__(self,tolerance):
-        self.tolerance = tolerance
+    def __init__(self):
+        self.tolerance = 50 
 
         self.data = {
             "area_name":None,
@@ -191,10 +191,9 @@ class Scanner:
     def update(self,frame):
         try:
             thread = Thread(target=self.scan, args=(frame,))
-
             thread.start()
-
             thread.join()
+
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

@@ -17,6 +17,7 @@ class ProtocolController:
             "wheel:default":lambda data, condition: self.wheel_counter(data, condition),
             "pass:default":lambda data, condition: self.pass_(data, condition),
             "sleep:default":lambda data, condition: self.sleep_counter(data, condition),
+            "distance:default":lambda data, condition: self.distance_controller(data, condition)
         }
 
         self.flag = True 
@@ -76,8 +77,6 @@ class ProtocolController:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-
-
     def wheel_counter(self, data, condition):
         try:
             d = data.get("distance_status")
@@ -93,6 +92,24 @@ class ProtocolController:
             if count - self.make_zero >= int(condition):
                 return True
 
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+    
+    def distance_controller(self, data, condition):
+        try:
+            distance_status = data.get("distance_status")
+            mz80 = distance_status.get("mz80") 
+            
+            pin = condition.get("pin")
+            state = condition.get("state") 
+
+            if pin is None or state is None: 
+                print(colored(f"[WARN] Distance, control protocol.", "yellow", attrs=["bold"]))
+
+            if mz80.get(pin) == state:
+                return True
+              
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

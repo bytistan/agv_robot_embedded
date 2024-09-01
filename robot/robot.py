@@ -22,27 +22,30 @@ import json
 
 class Robot_:
     def __init__(self):
-        self.tolerance = 500 
-
-        self.esp2_client = Esp32Client("ws://10.100.68.75:80")
+        self.esp2_client = Esp32Client("ws://10.100.68.74:80")
         self.sensor_listener = SensorListener("ws://10.100.68.66:80")
 
         self.camera = Camera()
         self.line_follower = LineFollower()
-        self.scanner = Scanner(self.tolerance)
+        self.scanner = Scanner()
 
         self.data = {
             "line_status":{},
             "distance_status":{},
-            "qr_data":{}
+            "scanned":{}
         }
         
-        self.start_time = time.time()
-        self.loop_time = None 
-        self.interval = 1
+        self.interval = {
+            "scan":0.1
+        }
+
+        self.timer = {
+            "line": time.time(),
+            "scan": time.time()
+        }
 
         self.status = {
-            "start_time":time.strftime("%H.%M", time.localtime(self.start_time)),
+            "start_time":time.strftime("%H.%M", time.localtime(time.time())),
             "battery":0,
             "speed":15.7,
             "tempature":0,
@@ -51,7 +54,6 @@ class Robot_:
         }
         
         self.brain = Brain(self.esp2_client)
-
 
     def setup(self, mission):
         try:
@@ -102,6 +104,30 @@ class Robot_:
             self.camera.close()
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+    
+    def gather_sensor_data(self, frame):
+        try:
+            # Search the qr code 
+            self.scanner.update(frame)
+            
+            # Set the all information coming from sensors
+            self.data["distance_status"]["mz80"] = self.sensor_listener.data.get("distance")
+
+            self.data["distance_status"]["count"] = self.sensor_listener.count
+
+            self.data["line_status"] = self.line_follower.update(frame)
+            
+            current_time = time.time()
+
+            scan_timer = self.timer.get("scan")
+            scan_interval = self.timer.get("scan")
+
+            if current_time - scan_timer >= scan_interval: 
+                self.data["scanned"] = self.scanner.data
+
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def run(self, mission):
         self.setup(mission)
@@ -116,17 +142,9 @@ class Robot_:
                     print(colored("[WARN] Camera is not working.", "red", attrs=["bold"]))
                     break   
 
-                # Search the qr code 
-                self.scanner.update(frame)
-                
-                # Set the all information coming from sensors
-                self.data["distance_status"]["mz80"] = self.sensor_listener.data.get("distance")
+                # Update the all sensor, from real world 
+                self.gather_sensor_data(frame)
 
-                self.data["distance_status"]["count"] = self.sensor_listener.count
-
-                self.data["line_status"] = self.line_follower.update(frame)
-                self.data["scanned"] = self.scanner.data
-                
                 # Update the brain, brain is control the robot
                 self.brain.update(self.data)
                

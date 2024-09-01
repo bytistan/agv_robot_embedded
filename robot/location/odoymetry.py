@@ -24,10 +24,10 @@ class Odoymetry:
             if mz80 is None:
                 return
             
-            if int(mz80.get("d1")) == 1 and not self.counter_flag:
+            if int(mz80.get("d4")) == 1 and not self.counter_flag:
                 self.counter_flag = True
            
-            if self.counter_flag and int(mz80.get("d1")) == 0:
+            if self.counter_flag and int(mz80.get("d4")) == 0:
                 self.counter_flag = False
 
                 location = Location.filter_one(Location.id > 0)

@@ -6,6 +6,7 @@ from models import *
 
 from robot.protocol.create import ProtocolCreator 
 from robot.protocol.exception_protocols.guidance import Guidance
+from robot.protocol.exception_protocols.obstacle import Obstalce 
 
 from .location.odoymetry import Odoymetry
 
@@ -17,14 +18,18 @@ class Brain:
             "guidance":None,
             "turn":None,
             "line_center":None,
-            "start":None
+            "start":None,
+            "stop":None,
+            "obstacle":None
         }
 
         self.mode_priority = {
             "guidance":0,
             "turn":2,
             "line_center":1,
-            "start":3
+            "start":3,
+            "obstacle":4,
+            "stop":5
         }
 
         self.esp2_client = esp2_client
@@ -34,8 +39,22 @@ class Brain:
 
         self.guidance = Guidance()
         self.odoymetry = Odoymetry()
+        self.obstacle = Obstalce()
 
         self.flag = True 
+    
+    def reset_all_protocol(self):
+        try:
+            self.mode["guidance"] = None
+            self.mode["turn"] = None
+            self.mode["line_center"] = None
+            self.mode["start"] = None
+            self.mode["stop"] = None
+            self.mode["obstacle"] = None
+
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def start(self):
         try:
@@ -77,7 +96,7 @@ class Brain:
             # Control the condition
             m,protocol = self.protocol_creator.control(data)
             
-            if m is not None and protocol is not None:
+            if m is not None and protocol is not None and not self.obstacle.flag:
                 # Check protocol name and type
                 name,tip = m.split(":")
 
@@ -125,7 +144,11 @@ class Brain:
                 
                 # If protocol is done, we clear that area
                 if protocol_handler.completed:
+
                     self.mode[m] = None
+
+                    if m == "obstacle":
+                        self.obstacle.reset()
 
             # In out table we have one colunm inside location 
             location = Location.filter_one(Location.id > 0)
@@ -143,10 +166,47 @@ class Brain:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
     
+    def critical_situation_control(self,data):
+        try:
+            self.obstacle.update(data)
+                
+            # Set the default robot location
+            location = Location.filter_one(Location.id > 0)
+            
+            # If location is not created, create one
+            if location is None:
+                print(colored(f"[WARN] Location is not found.", "yellow", attrs=["bold"]))
+                return
+            
+            stop = self.mode.get("stop")
+
+            if self.obstacle.flag and not self.obstacle.stop_flag:
+                self.reset_all_protocol()
+                protocol = self.protocol_creator.create("stop:default",default_protocol.get("stop"), self.esp2_client)
+                self.mode["stop"] = protocol 
+                self.obstacle.stop_flag = True
+
+            obstacle_protocol = self.mode.get("obstacle")
+
+            if self.obstacle.ok and obstacle_protocol is None:
+                protocol = self.protocol_creator.create("obstacle:default",default_protocol.get("obstacle_pass"), self.esp2_client)
+                self.mode["obstacle"] = protocol 
+                print(colored(f"[INFO] Obstacle avoider protocol created.", "yellow", attrs=["bold"]))
+                
+
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
     def update(self,data):
         try:
             if self.flag:
                 self.start()
+                
+            obstacle_protocol = self.mode.get("obstacle")
+            
+            # We don't wanna crash our robot 
+            self.critical_situation_control(data)
 
             # We follow the order 
             self.path_finder(data)
@@ -156,6 +216,7 @@ class Brain:
 
             # Also we have to check where the robot is 
             self.guidance.update(data ,self.mode)
+
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

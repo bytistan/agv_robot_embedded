@@ -19,12 +19,12 @@ class SensorListener:
     def wheel_counter(self, data):
         try:
             d = data.get("distance")
-            # print(colored(f"[INFO] {self.count},{d.get('d1')}", "yellow", attrs=["bold"]))
+            # print(colored(f"[INFO] {self.count},{d.get('d4')}", "yellow", attrs=["bold"]))
             
-            if int(d.get("d1")) == 1:
+            if int(d.get("d4")) == 1:
                 self.counter_flag = True
            
-            if self.counter_flag and int(d.get("d1")) == 0:
+            if self.counter_flag and int(d.get("d4")) == 0:
                 self.count += 1
                 self.counter_flag = False
         except Exception as e:
