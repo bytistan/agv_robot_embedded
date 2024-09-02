@@ -227,6 +227,19 @@ default_protocol = {
     ],
     "load": [
         {
+            "move": 1,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":0},
+                {"PIN":"NE_PWM","PWM":0},
+                {"PIN":"SW_PWM","PWM":0},
+                {"PIN":"SE_PWM","PWM":0}
+            ],
+            "tip": "time:default",
+            "condition": 0.425,
+            "completed": False,
+            "process": False
+        },
+        {
             "move": 0,
             "pwms": [
                 {"PIN":"NW_PWM","PWM":0},
@@ -242,10 +255,10 @@ default_protocol = {
         {
             "move": 9,
             "pwms": [
-                {"PIN":"LOAD_PWM","PWM":150}
+                {"PIN":"LOAD_PWM","PWM":255}
             ],
             "tip": "sleep:default",
-            "condition": 1.25,
+            "condition": 1,
             "completed": False,
             "process": False
         },
@@ -256,6 +269,19 @@ default_protocol = {
             ],
             "tip": "pass:default",
             "condition": True,
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 0,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":0},
+                {"PIN":"NE_PWM","PWM":0},
+                {"PIN":"SW_PWM","PWM":0},
+                {"PIN":"SE_PWM","PWM":0}
+            ],
+            "tip": "sleep:default",
+            "condition": 3,
             "completed": False,
             "process": False
         },
@@ -276,6 +302,19 @@ default_protocol = {
     ],
     "unload": [
         {
+            "move": 1,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":0},
+                {"PIN":"NE_PWM","PWM":0},
+                {"PIN":"SW_PWM","PWM":0},
+                {"PIN":"SE_PWM","PWM":0}
+            ],
+            "tip": "time:default",
+            "condition": 0.5,
+            "completed": False,
+            "process": False
+        },
+        {
             "move": 0,
             "pwms": [
                 {"PIN":"NW_PWM","PWM":0},
@@ -294,7 +333,7 @@ default_protocol = {
                 {"PIN":"LOAD_PWM","PWM":175}
             ],
             "tip": "sleep:default",
-            "condition": 1.25,
+            "condition": 1,
             "completed": False,
             "process": False
         },
@@ -305,6 +344,19 @@ default_protocol = {
             ],
             "tip": "pass:default",
             "condition": True,
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 0,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":0},
+                {"PIN":"NE_PWM","PWM":0},
+                {"PIN":"SW_PWM","PWM":0},
+                {"PIN":"SE_PWM","PWM":0}
+            ],
+            "tip": "sleep:default",
+            "condition": 3,
             "completed": False,
             "process": False
         },
@@ -349,7 +401,7 @@ default_protocol = {
                 {"PIN":"SE_PWM","PWM":225}
             ],
             "tip":"sleep:default",
-            "condition":3.5,
+            "condition":2.5,
             "completed": False,
             "process": False
         },

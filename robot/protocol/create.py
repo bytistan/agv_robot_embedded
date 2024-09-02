@@ -23,8 +23,8 @@ class ProtocolCreator:
             r = self.control_line_status(line_status)
             
             if r is not None:
-                name, protocol= r[0], r[1]
-                return name, protocol 
+                m, protocol= r[0], r[1]
+                return m, protocol 
 
             return None, None
         except Exception as e:
@@ -70,8 +70,15 @@ class ProtocolCreator:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def create(self, name, data, esp32_client):
+    def create(self, m, data, esp32_client, load_flag=False):
         try:
+            name,tip = m.split(":")
+
+            if load_flag and "turn" == name:
+                p = data[0]
+                default_time = p.get("condition") 
+                data[0]["condition"] = default_time + 0.5   
+                
             protocol_handler = ProtocolHandler()
 
             for p in data:
@@ -87,14 +94,14 @@ class ProtocolCreator:
                     move,
                     pwms,
                     controller,
-                    name,
+                    m,
                     esp32_client,
                     self.direction
                 )
 
                 protocol_handler.add(protocol_do)
 
-            print(colored(f"[INFO] Protocol created {name}.", "yellow", attrs=["bold"]))
+            print(colored(f"[INFO] Protocol created {m}.", "yellow", attrs=["bold"]))
 
             return protocol_handler
         except Exception as e:

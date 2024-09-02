@@ -2,6 +2,44 @@ import cv2
 from pyzbar import pyzbar
 from termcolor import colored
 
+def is_qr_code_centered_y(bbox, img):
+    """
+    Checks if the QR code is centered on the y-axis and provides instructions to move forward or backward.
+    Enhances sensitivity for detecting small deviations in QR code position.
+    
+    bbox: Bounding box containing the coordinates of the QR code.
+    img: The image containing the QR code.
+    """
+    try:
+        if bbox is not None:
+            # Calculate the y-axis center of the QR code
+            qr_center_y = (bbox[0][1] + bbox[2][1]) / 2
+
+            # Calculate the y-axis center of the image
+            img_center_y = img.shape[0] / 2
+
+            # Calculate the height of the QR code
+            qr_height = abs(bbox[2][1] - bbox[0][1])
+
+            # Calculate a more sensitive tolerance based on the QR code height
+            tolerance = qr_height / 3  
+            
+            # Calculate the distance between the QR code's center and the image's center on the y-axis
+            distance_y = qr_center_y - img_center_y
+
+            # More precise sensitivity check based on the smaller tolerance range
+            if abs(distance_y) <= tolerance:
+                return 0  # Centered (very small deviation allowed)
+            elif distance_y < -tolerance:
+                return 2  # Forward (QR code is above center)
+            else:
+                return 1  # Backward (QR code is below center)
+        else:
+            return 0  # No QR code found, assume centered
+    except Exception as e:
+        error_details = traceback.format_exc()
+        print(f"[TRACEBACK] {error_details}")
+
 def is_qr_code_centered(bbox, img, tolerance):
     try:
         if bbox is not None:
@@ -50,7 +88,7 @@ def qr_reader(img, tolerance):
 
                 if data:
                     extract_data = split_qr(data)
-                    centered = is_qr_code_centered(bbox, img, tolerance)
+                    centered = is_qr_code_centered_y(bbox, img)
                     return extract_data, centered
     except Exception as e:
         error_details = traceback.format_exc()

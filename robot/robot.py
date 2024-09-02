@@ -37,7 +37,7 @@ class Robot_:
         
         self.timer = {
             "last_time": time.time(),
-            "interval" : 0.1
+            "interval" : 0.025
         }
 
         self.status = {
@@ -124,6 +124,26 @@ class Robot_:
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+    
+    def shutdown(self):
+        try:
+            self.esp2_client.close()
+            self.sensor_listener.close()
+            self.camera.close()
+            sys.exit()
+            print(colored(f"[INFO] Robot is shutdown.", "red", attrs=["bold"]))
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
+    def reset(self):
+        try:
+            self.brain = Brain(self.esp2_client)
+            self.mission = None
+
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def run(self, mission):
         self.setup(mission)
@@ -160,6 +180,7 @@ class Robot_:
                     )
 
                     print(colored("[INFO] Mission completed.", "yellow", attrs=["bold"]))
+                    self.reset()        
                     break
 
             # If user close the program 

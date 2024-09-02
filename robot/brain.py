@@ -7,6 +7,7 @@ from models import *
 from robot.protocol.create import ProtocolCreator 
 from robot.protocol.exception_protocols.guidance import Guidance
 from robot.protocol.exception_protocols.obstacle import Obstalce 
+# from robot.protocol.exception_protocols.center import Center 
 
 from .location.odoymetry import Odoymetry
 
@@ -44,6 +45,7 @@ class Brain:
         self.guidance = Guidance()
         self.odoymetry = Odoymetry()
         self.obstacle = Obstalce()
+        # self.center = Center(self.esp2_client)
 
         self.flag = True 
 
@@ -67,8 +69,17 @@ class Brain:
 
     def start(self):
         try:
-            protocol = self.protocol_creator.create("start:default",default_protocol.get("forward"), self.esp2_client)
+            load_flag = self.load.get("flag")
+
+            protocol = self.protocol_creator.create(
+                           "start:default",
+                           default_protocol.get("forward"), 
+                           self.esp2_client,
+                           load_flag
+                       )
+
             self.mode["start"] = protocol 
+
             self.flag = False
 
         except Exception as e:
@@ -115,26 +126,48 @@ class Brain:
                     if name == "turn":
                         # If robot want's to turn it's have to be target, here we control that 
                         move = self.guidance.find_direction(name,tip)
+                        load_flag = self.load.get("flag")
 
                         if tip == "corner":
-                            self.mode[name] = self.protocol_creator.create(m,protocol,self.esp2_client) 
 
+                            self.mode[name] = self.protocol_creator.create(
+                                                  m,
+                                                  protocol,
+                                                  self.esp2_client,
+                                                  load_flag
+                                              ) 
+                        if tip == "or":
+                            # We don't wanna go outside 
+                            r = move if move is not None else 6
+
+                            # We give them which direction is  
+                            protocol[0]["move"] = r 
+
+                            # And create the protocol  
+                            self.mode[name] = self.protocol_creator.create(
+                                                  m,
+                                                  protocol,
+                                                  self.esp2_client,
+                                                  load_flag
+                                              ) 
                         # If robot want move 
                         elif move is not None:
-
                             # Check turn type default robot can turn one way  
 
                             if tip == "default" and protocol[0].get("move") == move:
-                                self.mode[name] = self.protocol_creator.create(m,protocol,self.esp2_client) 
-                            # Check turn type or robot can turn two way  
-                            elif tip == "or":
-                                # We give them which direction is  
-                                protocol[0]["move"] = move 
-                                # And create the protocol  
-                                self.mode[name] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+                                self.mode[name] = self.protocol_creator.create(
+                                                      m,
+                                                      protocol,
+                                                      self.esp2_client,
+                                                      load_flag
+                                                  ) 
                     else:
                         # Some protocols is reflex protocol like obstacle avoider or line_center, robot have do that  
-                        self.mode[name] = self.protocol_creator.create(m,protocol,self.esp2_client) 
+                        self.mode[name] = self.protocol_creator.create(
+                                              m,
+                                              protocol,
+                                              self.esp2_client
+                                          ) 
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
@@ -158,6 +191,10 @@ class Brain:
 
                     if m == "obstacle":
                         self.obstacle.reset()
+                    
+                    # elif m == "unload": 
+                        # self.center.reset()
+
 
             # In out table we have one colunm inside location 
             location = Location.filter_one(Location.id > 0)
@@ -221,12 +258,11 @@ class Brain:
                 return
 
             load_mode = self.mode.get("load")
-
             unload_mode = self.mode.get("unload")
             
             l_flag = self.load.get("flag")
             l_name = self.load.get("name")
-            
+
             c_flag = True if load_mode is None and unload_mode is None else False 
             n_flag = True if l_name != area_name else False  
 
@@ -265,7 +301,7 @@ class Brain:
         try:
             if self.flag:
                 self.start()
-            
+
             # We don't wanna crash our robot 
             # self.critical_situation_control(data)
 

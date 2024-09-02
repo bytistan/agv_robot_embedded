@@ -11,9 +11,9 @@ class RobotClient:
         self.sio = socketio.Client()
         self.auth_data = auth_data
 
-        self.robot_info = Robot.filter_one(Robot.id > 0)
-
         self.robot = Robot_()
+
+        self.robot_info = Robot.filter_one(Robot.id > 0)
 
         # Socket.io event handlers
         self.sio.event(self.connect)
@@ -59,12 +59,19 @@ class RobotClient:
             robot_id = self.robot_info.id
                 
             any_active_mission = Mission.filter_one(Mission.is_active==True)
-            is_active = False if any_active_mission else True
 
-            if not is_active:
+            is_active = True if any_active_mission else False 
+        
+            if is_active:
+                Mission.update(
+                    any_active_mission.id,
+                    is_active = False,
+                    completed = False 
+                )
+                 
                 print(colored(f"[WARN] Active mission detected id:{any_active_mission.id}.", "yellow" ,attrs=["bold"])) 
 
-            mission = Mission.create(robot_id=robot_id,is_active=is_active)
+            mission = Mission.create(robot_id=robot_id,is_active=True)
 
             print(colored(f"[INFO] Mission saved to database id:{mission.id}.", "green" ,attrs=["bold"])) 
             return mission
@@ -95,6 +102,7 @@ class RobotClient:
 
     def handle_mission(self, data):
         try:
+
             message = data.get("message")
 
             if not message:

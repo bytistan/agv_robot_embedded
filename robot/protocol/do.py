@@ -34,6 +34,7 @@ class ProtocolDo:
     def do(self):
         try:
             if not self.process:
+
                 self.esp32_client.send(self.move,self.pwms)
 
                 location = Location.filter_one(Location.id > 0)

@@ -115,17 +115,15 @@ class Guidance:
                        tmp.get("y")
                    )
             
-            deb = "left" if move == 5 else "right"
-            
             if p_type == "or":                
-                print(colored(f"[INFO] Move to {deb}.", "blue", attrs=["bold"]))
+                print(colored(f"[INFO] Move to {move}.", "blue", attrs=["bold"]))
                 return move
             elif p_type == "default":
                 if location.direction_x != 0 and self.reached.get("x"):
-                    print(colored(f"[INFO] Move to {deb}.", "blue", attrs=["bold"]))
+                    print(colored(f"[INFO] Move to {move}.", "blue", attrs=["bold"]))
                     return move
                 elif location.direction_y != 0 and self.reached.get("y"):
-                    print(colored(f"[INFO] Move to {deb}.", "blue", attrs=["bold"]))
+                    print(colored(f"[INFO] Move to {move}.", "blue", attrs=["bold"]))
                     return move
 
         except Exception as e:
