@@ -308,9 +308,10 @@
   {
     "fi": {
         "line_status":{
-            "0": [25,1],
+            "0": [15,1],
+            "0": [50,0],
             "2": [25,0],
-            "3": [50,0]
+            "3": [55,0]
         }
     },
     "name": "line_center:default",
@@ -346,9 +347,10 @@
   {
     "fi": {
         "line_status":{
-            "6": [25,1],
+            "6": [15,1],
+            "6": [50,0],
             "8": [25,0],
-            "3": [50,0]
+            "3": [55,0]
         }
     },
     "name": "line_center:default",
@@ -399,7 +401,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "tip": "sleep:default",
-        "condition":0.05,
+        "condition":0.025,
         "completed": false,
         "process": false
       },
@@ -436,7 +438,7 @@
             {"PIN":"SE_PWM","PWM":200}
         ],
         "tip": "sleep:default",
-        "condition":0.05,
+        "condition":0.025,
         "completed": false,
         "process": false
       },
