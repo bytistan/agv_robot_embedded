@@ -7,21 +7,23 @@ from robot.settings import *
 class Obstalce:
     def __init__(self):
         self.flag = False
-        self.start_flag = False
+        self.count_flag = False
 
         self.interval = 15
         
         self.ok = False
-        self.process = False
+
         self.stop_flag = False
+        self.start_flag = False
         
     def reset(self):
         try:
             self.ok = False
-            self.process = False
+
             self.stop_flag = False
+
             self.flag = False
-            self.start_flag = False
+            self.count_flag = False
 
         except Exception as e:
             error_details = traceback.format_exc()
@@ -38,8 +40,12 @@ class Obstalce:
             if front_sensor == 0 and not self.flag:
                 self.flag = True
 
-                self.start_flag = True 
+                self.count_flag = True 
                 self.stop_flag = False
+
+            if front_sensor == 1 and self.flag:
+                self.reset()
+                self.start_flag = True
 
         except Exception as e:
             error_details = traceback.format_exc()
@@ -47,10 +53,10 @@ class Obstalce:
 
     def count(self):
         try: 
-            if self.start_flag:
+            if self.count_flag:
                 print(colored(f"[INFO] Obstacle detected, begin to count.", "yellow", attrs=["bold"]))
                 self.timer = time.time()
-                self.start_flag = False
+                self.count_flag = False
             
             current_time = time.time()
 
@@ -69,7 +75,7 @@ class Obstalce:
                 self.count()
             else:
                 self.ok = False
-                self.start_flag = False
+                self.count_flag = False
 
         except Exception as e:
             error_details = traceback.format_exc()

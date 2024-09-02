@@ -35,13 +35,9 @@ class Robot_:
             "scanned":{}
         }
         
-        self.interval = {
-            "scan":0.1
-        }
-
         self.timer = {
-            "line": time.time(),
-            "scan": time.time()
+            "last_time": time.time(),
+            "interval" : 0.1
         }
 
         self.status = {
@@ -107,9 +103,6 @@ class Robot_:
     
     def gather_sensor_data(self, frame):
         try:
-            # Search the qr code 
-            self.scanner.update(frame)
-            
             # Set the all information coming from sensors
             self.data["distance_status"]["mz80"] = self.sensor_listener.data.get("distance")
 
@@ -119,11 +112,14 @@ class Robot_:
             
             current_time = time.time()
 
-            scan_timer = self.timer.get("scan")
-            scan_interval = self.timer.get("scan")
+            last_time = self.timer.get("last_time")
+            interval = self.timer.get("interval")
 
-            if current_time - scan_timer >= scan_interval: 
+            if current_time - last_time >= interval: 
+                self.scanner.update(frame)
+
                 self.data["scanned"] = self.scanner.data
+                self.timer["last_time"] = time.time()
 
         except Exception as e:
             error_details = traceback.format_exc()

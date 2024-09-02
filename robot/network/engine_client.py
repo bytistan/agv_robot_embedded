@@ -36,6 +36,9 @@ class Esp32Client:
         try:
             pins = pins_data.get(int(move))
             message = self.format_data(pins, pwms)
+            
+            if move in [9,10,11]:
+                message = "?" + message
 
             self.ws.send(message)
         except Exception as e:

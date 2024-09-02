@@ -2,9 +2,9 @@
   {
     "fi": {
         "line_status":{
-            "1": [50,1],
-            "5": [50,1],
-            "7": [50,1]
+            "1": [45,1],
+            "5": [45,1],
+            "7": [45,1]
        }
     },
     "name": "turn:or",
@@ -16,8 +16,8 @@
             {"PIN":"SW_PWM","PWM":225},
             {"PIN":"SE_PWM","PWM":225}
         ],
-        "tip": "wheel:default",
-        "condition": 30, 
+        "tip": "sleep:default",
+        "condition": 5.5, 
         "complated": false,
         "process": false
       },
@@ -39,10 +39,10 @@
   {
     "fi": {
         "line_status":{
-            "1": [50,1],
-            "3": [50,1],
+            "1": [45,1],
+            "3": [45,1],
 
-            "5": [50,1],
+            "5": [45,1],
             "7": [25,0],
 
             "0": [25,0],
@@ -61,8 +61,8 @@
             {"PIN":"SW_PWM","PWM":225},
             {"PIN":"SE_PWM","PWM":225}
         ],
-        "tip":"wheel:default",
-        "condition": 30,
+        "tip":"sleep:default",
+        "condition": 5.5, 
         "complated": false,
         "process": false
       },
@@ -85,10 +85,10 @@
     "fi": {
         "line_status": {
             "1": [25,0],
-            "3": [50,1],
+            "3": [45,1],
 
-            "5": [50,1],
-            "7": [50,1],
+            "5": [45,1],
+            "7": [45,1],
 
             "0": [25,0],
             "2": [25,0],
@@ -106,8 +106,8 @@
             {"PIN":"SW_PWM","PWM":225},
             {"PIN":"SE_PWM","PWM":225}
         ],
-        "tip":"wheel:default",
-        "condition": 30, 
+        "tip":"sleep:default",
+        "condition": 5.5, 
         "complated": false,
         "process": false
       },
@@ -130,10 +130,10 @@
     "fi": {
         "line_status":{
             "1": [25,0],
-            "5": [50,1],
+            "5": [45,1],
 
             "3": [25,0],
-            "7": [50,1],
+            "7": [45,1],
 
             "0": [25,0],
             "2": [25,0],
@@ -151,8 +151,8 @@
             {"PIN":"SW_PWM","PWM":225},
             {"PIN":"SE_PWM","PWM":225}
         ],
-        "tip": "wheel:default",
-        "condition": 30, 
+        "tip": "sleep:default",
+        "condition": 5.5, 
         "complated": false,
         "process": false
       },
@@ -174,10 +174,10 @@
   {
     "fi": {
         "line_status":{
-            "1": [50,1],
+            "1": [45,1],
             "3": [25,0],
 
-            "5": [50,1],
+            "5": [45,1],
             "7": [25,0],
 
             "0": [25,0],
@@ -196,8 +196,8 @@
             {"PIN":"SW_PWM","PWM":225},
             {"PIN":"SE_PWM","PWM":225}
         ],
-        "tip":"wheel:default",
-        "condition": 30, 
+        "tip": "sleep:default",
+        "condition": 5.5, 
         "complated": false,
         "process": false
       },
@@ -241,7 +241,7 @@
         "tip": "line_status:or",
         "condition": {
             "index":[3,4,5],
-            "bp":60
+            "bp":50
         },
         "completed": false,
         "process": false
@@ -285,7 +285,7 @@
         "tip": "line_status:or",
         "condition":{
             "index":[3,4,5],
-            "bp":60
+            "bp":50
         },
         "completed": false,
         "process": false
@@ -324,7 +324,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "tip": "sleep:default",
-        "condition":0.25,
+        "condition":0.15,
         "completed": false,
         "process": false
       },
@@ -362,7 +362,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "tip": "sleep:default",
-        "condition":0.25,
+        "condition":0.15,
         "completed": false,
         "process": false
       },
@@ -399,7 +399,7 @@
             {"PIN":"SE_PWM","PWM":225}
         ],
         "tip": "sleep:default",
-        "condition":0.15,
+        "condition":0.05,
         "completed": false,
         "process": false
       },
@@ -436,7 +436,7 @@
             {"PIN":"SE_PWM","PWM":200}
         ],
         "tip": "sleep:default",
-        "condition":0.15,
+        "condition":0.05,
         "completed": false,
         "process": false
       },

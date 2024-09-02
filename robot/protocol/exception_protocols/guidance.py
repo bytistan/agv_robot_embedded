@@ -12,7 +12,7 @@ from robot.settings import *
 class Guidance:
     def __init__(self):
         self.navigation = Navigation()
-        self.tolerance = 100 
+        self.tolerance = 250 
         
         self.reached = {
             "x":False,
@@ -157,8 +157,9 @@ class Guidance:
             self.reached["y"] = True if l_vc + self.tolerance > d_vc > l_vc - self.tolerance else False  
 
             if self.reached["x"] and self.reached["y"]:
-                qr_data = data.get("scanned") 
-                scanned_area_name = qr_data.get("area_name")
+                scanned = data.get("scanned") 
+
+                scanned_area_name = scanned.get("area_name")
                 scanned_area_equivalent = QR_EQUIVALENT.get(scanned_area_name)
 
                 area_name = self.navigation.destination.area_name
@@ -172,19 +173,20 @@ class Guidance:
                     verification = True
                 elif area_name == scanned_area_equivalent:
                     verification = True
-                    
-                self.rest()
-                self.flag = True
+                
+                if verification:
+                    self.rest()
+                    self.flag = True
 
-                RoadMap.update(
-                    self.navigation.destination.id,
-                    active = False,
-                    reached = True
-                )
+                    RoadMap.update(
+                        self.navigation.destination.id,
+                        active = False,
+                        reached = True
+                    )
 
 
-                self.navigation.update()
-                print(colored(f"[WARN] Reached the destination area coordinate.", "blue", attrs=["bold"]))
+                    self.navigation.update()
+                    print(colored(f"[WARN] Reached the destination area coordinate.", "blue", attrs=["bold"]))
 
             if self.navigation.destination is None:
                 self.completed = True

@@ -11,7 +11,7 @@ class Odoymetry:
         self.debug = True 
         self.counter_flag = False
         
-        self.one_move_mm = 37.5 
+        self.one_move_mm = 43 
         
         self.flag = True 
 

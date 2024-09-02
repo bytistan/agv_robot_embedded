@@ -1,10 +1,10 @@
 QR_EQUIVALENT = {
-    "S2":"Q7",
-    "S1":"Q22",
-    "A":"Q50",
-    "B":"Q45",
-    "C":"Q38",
-    "D":"Q33"
+    "Q7":"S2",
+    "Q22":"S1",
+    "Q50":"A",
+    "Q45":"B",
+    "Q38":"C",
+    "Q33":"D"
 }
 
 pins_data = {
@@ -105,6 +105,18 @@ pins_data = {
 
         {"PIN":"SE_FW", "STATE":0},
         {"PIN":"SE_BW", "STATE":1},
+    ],
+    9: [
+        {"PIN":"UP_PIN", "STATE":1},
+        {"PIN":"DOWN_PIN", "STATE":0}
+    ],
+    10: [
+        {"PIN":"UP_PIN", "STATE":0},
+        {"PIN":"DOWN_PIN", "STATE":1}
+    ],
+    11: [
+        {"PIN":"UP_PIN", "STATE":0},
+        {"PIN":"DOWN_PIN", "STATE":0}
     ]
 }
 
@@ -120,6 +132,12 @@ pwms_data= {
         {"PIN":"NE_PWM","PWM":225},
         {"PIN":"SW_PWM","PWM":225},
         {"PIN":"SE_PWM","PWM":225}
+    ],
+    2: [
+        {"PIN":"LOAD_PWM","PWM":150}
+    ],
+    3: [
+        {"PIN":"LOAD_PWM","PWM":0}
     ]
 } 
 
@@ -206,6 +224,104 @@ default_protocol = {
             "completed": False,
             "process": False
         }
+    ],
+    "load": [
+        {
+            "move": 0,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":0},
+                {"PIN":"NE_PWM","PWM":0},
+                {"PIN":"SW_PWM","PWM":0},
+                {"PIN":"SE_PWM","PWM":0}
+            ],
+            "tip": "pass:default",
+            "condition": True,
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 9,
+            "pwms": [
+                {"PIN":"LOAD_PWM","PWM":150}
+            ],
+            "tip": "sleep:default",
+            "condition": 1,
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 11,
+            "pwms": [
+                {"PIN":"LOAD_PWM","PWM":0}
+            ],
+            "tip": "pass:default",
+            "condition": True,
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 1,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":225},
+                {"PIN":"NE_PWM","PWM":225},
+                {"PIN":"SW_PWM","PWM":225},
+                {"PIN":"SE_PWM","PWM":225}
+            ],
+            "tip": "sleep:default",
+            "condition": 2,
+            "completed": False,
+            "process": False
+        }
+
+    ],
+    "unload": [
+        {
+            "move": 0,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":0},
+                {"PIN":"NE_PWM","PWM":0},
+                {"PIN":"SW_PWM","PWM":0},
+                {"PIN":"SE_PWM","PWM":0}
+            ],
+            "tip": "pass:default",
+            "condition": True,
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 10,
+            "pwms": [
+                {"PIN":"LOAD_PWM","PWM":175}
+            ],
+            "tip": "sleep:default",
+            "condition": 1,
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 11,
+            "pwms": [
+                {"PIN":"LOAD_PWM","PWM":0}
+            ],
+            "tip": "pass:default",
+            "condition": True,
+            "completed": False,
+            "process": False
+        },
+        {
+            "move": 1,
+            "pwms": [
+                {"PIN":"NW_PWM","PWM":225},
+                {"PIN":"NE_PWM","PWM":225},
+                {"PIN":"SW_PWM","PWM":225},
+                {"PIN":"SE_PWM","PWM":225}
+            ],
+            "tip": "sleep:default",
+            "condition": 2,
+            "completed": False,
+            "process": False
+        }
+
     ],
     "obstacle_pass": [
         {

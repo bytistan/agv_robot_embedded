@@ -20,16 +20,20 @@ class Brain:
             "line_center":None,
             "start":None,
             "stop":None,
+            "load":None,
+            "unload":None,
             "obstacle":None
         }
 
         self.mode_priority = {
-            "guidance":0,
-            "turn":2,
-            "line_center":1,
-            "start":3,
-            "obstacle":4,
-            "stop":5
+            "guidance"    : 0,
+            "turn"        : 2,
+            "line_center" : 1,
+            "start"       : 3,
+            "obstacle"    : 4,
+            "stop"        : 5,
+            "load"        : 6,
+            "unload"      : 7
         }
 
         self.esp2_client = esp2_client
@@ -42,6 +46,11 @@ class Brain:
         self.obstacle = Obstalce()
 
         self.flag = True 
+
+        self.load = {
+            "flag":False,
+            "name":None
+        }
     
     def reset_all_protocol(self):
         try:
@@ -177,23 +186,77 @@ class Brain:
             if location is None:
                 print(colored(f"[WARN] Location is not found.", "yellow", attrs=["bold"]))
                 return
-            
-            stop = self.mode.get("stop")
 
             if self.obstacle.flag and not self.obstacle.stop_flag:
                 self.reset_all_protocol()
                 protocol = self.protocol_creator.create("stop:default",default_protocol.get("stop"), self.esp2_client)
                 self.mode["stop"] = protocol 
                 self.obstacle.stop_flag = True
+            
+            if self.obstacle.start_flag:
+                print(colored(f"[INFO] The obstacle was pulled out of the way.", "blue", attrs=["bold"]))
+                protocol = self.protocol_creator.create("start:default",default_protocol.get("forward"), self.esp2_client)
+                self.mode["start"] = protocol 
+
+                self.obstacle.start_flag = False 
 
             obstacle_protocol = self.mode.get("obstacle")
 
             if self.obstacle.ok and obstacle_protocol is None:
                 protocol = self.protocol_creator.create("obstacle:default",default_protocol.get("obstacle_pass"), self.esp2_client)
                 self.mode["obstacle"] = protocol 
-                print(colored(f"[INFO] Obstacle avoider protocol created.", "yellow", attrs=["bold"]))
+                print(colored(f"[INFO] Obstacle avoider protocol created.", "blue", attrs=["bold"]))
                 
 
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+
+    def load_manager(self, data):
+        try:
+            scanned = data.get("scanned")
+            area_name = scanned.get("area_name") 
+
+            if area_name not in ["Q50","Q45","Q38","Q33"]: 
+                return
+
+            load_mode = self.mode.get("load")
+
+            unload_mode = self.mode.get("unload")
+            
+            l_flag = self.load.get("flag")
+            l_name = self.load.get("name")
+            
+            c_flag = True if load_mode is None and unload_mode is None else False 
+            n_flag = True if l_name != area_name else False  
+
+            if not l_flag and c_flag and n_flag:
+                protocol = self.protocol_creator.create(
+                               "load:default",
+                               default_protocol.get("load"), 
+                               self.esp2_client
+                           )
+
+                self.mode["load"] = protocol 
+
+                self.load["flag"] = True
+                self.load["name"] = area_name 
+
+                print(colored(f"[INFO] Load taking.", "blue", attrs=["bold"]))
+
+            elif l_flag and c_flag and n_flag: 
+                protocol = self.protocol_creator.create(
+                               "unload:default",
+                               default_protocol.get("unload"), 
+                               self.esp2_client
+                           )
+
+                self.mode["unload"] = protocol 
+
+                self.load["flag"] = False 
+                self.load["name"] = area_name 
+
+                print(colored(f"[INFO] Unloading.", "blue", attrs=["bold"]))
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
@@ -202,11 +265,9 @@ class Brain:
         try:
             if self.flag:
                 self.start()
-                
-            obstacle_protocol = self.mode.get("obstacle")
             
             # We don't wanna crash our robot 
-            self.critical_situation_control(data)
+            # self.critical_situation_control(data)
 
             # We follow the order 
             self.path_finder(data)
@@ -216,6 +277,9 @@ class Brain:
 
             # Also we have to check where the robot is 
             self.guidance.update(data ,self.mode)
+            
+            # We take care the load
+            self.load_manager(data)
 
         except Exception as e:
             error_details = traceback.format_exc()
