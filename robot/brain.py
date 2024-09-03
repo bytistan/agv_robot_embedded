@@ -14,7 +14,7 @@ from .location.odoymetry import Odoymetry
 from .settings import *
 
 class Brain:
-    def __init__(self,esp2_client):
+    def __init__(self,esp2_client, tip=1):
         self.mode = {
             "guidance":None,
             "turn":None,
@@ -53,7 +53,8 @@ class Brain:
             "flag":False,
             "name":None
         }
-    
+        
+        self.completed = False
     def reset_all_protocol(self):
         try:
             self.mode["guidance"] = None
@@ -293,6 +294,13 @@ class Brain:
                 self.load["name"] = area_name 
 
                 print(colored(f"[INFO] Unloading.", "blue", attrs=["bold"]))
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+    
+    def controller(self,):
+        try:
+            pass
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))

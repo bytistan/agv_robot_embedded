@@ -3,15 +3,17 @@ from robot.robot import Robot_
 from models import *
 
 import socketio
+
 from termcolor import colored
 import traceback
+from datetime import datetime, timedelta
 
 class RobotClient:
     def __init__(self, auth_data):
         self.sio = socketio.Client()
         self.auth_data = auth_data
 
-        self.robot = Robot_()
+        self.robot = Robot_(self.sio, auth_data)
 
         self.robot_info = Robot.filter_one(Robot.id > 0)
 
@@ -23,6 +25,13 @@ class RobotClient:
 
         self.sio.on("mission", self.handle_mission)
         self.sio.on("join_robot", self.handle_robot_connection)
+    
+    def setup(self):
+        try:
+            pass
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
     def connect(self):
         try:
@@ -54,27 +63,37 @@ class RobotClient:
             error_details = traceback.format_exc()
             print(colored(f"[ERR] {e}\n[TRACEBACK] {error_details}", "red", attrs=["bold"]))
 
-    def save_mission(self):
+    def save_mission(self, rank):
         try:
             robot_id = self.robot_info.id
-                
-            any_active_mission = Mission.filter_one(Mission.is_active==True)
 
-            is_active = True if any_active_mission else False 
-        
-            if is_active:
+            # Check active mission around    
+            is_active_mission = Mission.filter_one(Mission.is_active==True)
+            
+            flag = True 
+            
+            if is_active_mission is not None and rank > is_active_mission.rank:
                 Mission.update(
-                    any_active_mission.id,
+                    is_active_mission.id,
                     is_active = False,
-                    completed = False 
+                    completed = False
                 )
-                 
-                print(colored(f"[WARN] Active mission detected id:{any_active_mission.id}.", "yellow" ,attrs=["bold"])) 
 
-            mission = Mission.create(robot_id=robot_id,is_active=True)
+                print(colored(f"[WARN] A more important mission has come.", "yellow" ,attrs=["bold"])) 
+            elif is_active_mission is not None:
+                flag = False     
+
+            mission = Mission.create(
+                          robot_id=robot_id,
+                          is_active=flag,
+                          rank=rank
+                      )
 
             print(colored(f"[INFO] Mission saved to database id:{mission.id}.", "green" ,attrs=["bold"])) 
-            return mission
+
+            response = mission if flag else is_active_mission
+
+            return response, flag 
         except Exception as e:
             error_details = traceback.format_exc()
             print(colored(f"[ERR] {e}\n[TRACEBACK] {error_details}", "red", attrs=["bold"]))
@@ -102,23 +121,37 @@ class RobotClient:
 
     def handle_mission(self, data):
         try:
-
             message = data.get("message")
-
+        
             if not message:
                 print(colored(f"[WARN] Invalid message : {data}.", "yellow" ,attrs=["bold"])) 
                 return  
+            
+            rank = message.get("rank")
+            
+            if rank is None:
+                print(colored(f"[WARN] Rank not found.", "yellow" ,attrs=["bold"])) 
+                return  
 
-            mission = self.save_mission()
+            mission,flag = self.save_mission(rank)
 
             if mission is  None:
                 print(colored(f"[WARN] Mission not found.", "yellow" ,attrs=["bold"])) 
                 return  
 
-            self.save_road_map(mission, message)
+            road_map = message.get("road_map") 
+
+            if road_map is  None:
+                print(colored(f"[WARN] Road map not found.", "yellow" ,attrs=["bold"])) 
+                return  
+
+            self.save_road_map(mission, road_map)
 
             print(colored(f"[INFO] Mission successuly coming.", "green" ,attrs=["bold"])) 
             
+            if flag:
+                self.robot.reset()
+
             self.robot.run(mission)
         except Exception as e:
             error_details = traceback.format_exc()

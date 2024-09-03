@@ -21,7 +21,10 @@ from termcolor import colored
 import json
 
 class Robot_:
-    def __init__(self):
+    def __init__(self,sio,auth_data):
+        self.sio = sio
+        self.auth_data = auth_data
+
         self.esp2_client = Esp32Client("ws://10.100.68.74:80")
         self.sensor_listener = SensorListener("ws://10.100.68.66:80")
 
@@ -40,6 +43,11 @@ class Robot_:
             "interval" : 0.025
         }
 
+        self.distribute_timer = {
+            "last_time": time.time(),
+            "interval" : 1
+        }
+ 
         self.status = {
             "start_time":time.strftime("%H.%M", time.localtime(time.time())),
             "battery":0,
@@ -50,6 +58,7 @@ class Robot_:
         }
         
         self.brain = Brain(self.esp2_client)
+        self.active = True
 
     def setup(self, mission):
         try:
@@ -101,6 +110,32 @@ class Robot_:
             error_details = traceback.format_exc()
             print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
     
+    def distribute_sensor_data(self):
+        try:
+            current_time = time.time()
+
+            last_time = self.distribute_timer.get("last_time")
+            interval = self.distribute_timer.get("interval")
+            
+            serial_number = self.auth_data.get("serial_number")
+
+            if current_time - last_time >= interval: 
+                self.sio.emit( 
+                    "status", 
+                    {
+                        "message":{
+                            "test":"tomato",
+                        },
+                        "room_name": serial_number
+                    }
+                )
+
+                self.distribute_timer["last_time"] = time.time()
+
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK] {error_details}", "red", attrs=["bold"]))
+            
     def gather_sensor_data(self, frame):
         try:
             # Set the all information coming from sensors
@@ -140,6 +175,7 @@ class Robot_:
         try:
             self.brain = Brain(self.esp2_client)
             self.mission = None
+            self.active = False
 
         except Exception as e:
             error_details = traceback.format_exc()
@@ -148,7 +184,7 @@ class Robot_:
     def run(self, mission):
         self.setup(mission)
 
-        while True:
+        while self.active:
             try:
                 # We get the frame
                 frame = self.camera.capture_frame()
@@ -160,12 +196,15 @@ class Robot_:
 
                 # Update the all sensor, from real world 
                 self.gather_sensor_data(frame)
+                
+                # Distribute all data
+                self.distribute_sensor_data()
 
                 # Update the brain, brain is control the robot
                 self.brain.update(self.data)
                
                 # Mission is completed ? 
-                if self.brain.guidance.completed:
+                if self.brain.completed:
                     # We directly stop the motor 
                     self.esp2_client.send(
                         0,
