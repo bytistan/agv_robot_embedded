@@ -37,7 +37,8 @@ class Camera:
             # Retrieve the image in grayscale
             self.cam.retrieve_image(image_zed, sl.VIEW.LEFT_GRAY)  # Or use sl.VIEW.RIGHT_GRAY
             frame = image_zed.get_data()
-            return frame
+            cropped_frame = crop_image_by_percentage(frame,10,10)
+            return cropped_frame 
         else:
             print("Failed to capture image")
             return None

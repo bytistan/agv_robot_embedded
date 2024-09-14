@@ -20,4 +20,3 @@ class QRCode(BaseModel):
 
     robot = relationship("Robot", back_populates="qr_code")
     robot_information = relationship("RobotInformation", back_populates="qr_code")
-    road_map = relationship("RoadMap", back_populates="qr_code")

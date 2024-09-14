@@ -4,15 +4,42 @@ import websocket
 import json
 from termcolor import colored
 import traceback
+from robot.settings import *
 
-class esp32Client:
-    def __init__(self):
-        self.server_url = "ws://192.168.137.6:5000"
+class Esp32Client:
+    def __init__(self,url):
+        self.server_url = url 
         self.ws = None
+        self.connect_to_server()
 
-    def send(self, order, speed=0):
+    def format_data(self, pins, pwms):
         try:
-            message = f"{order}:{speed}" 
+            formatted_strings = []
+
+            if pins:
+                for pin in pins:
+                    formatted_strings.append(f"{pin['PIN']}:{str(pin['STATE'])}")
+
+            if pwms:
+                for pwm in pwms:
+                    formatted_strings.append(f"{pwm['PIN']}:{str(pwm['PWM'])}")
+
+            result_string = "$".join(formatted_strings)
+
+            return result_string
+
+        except Exception as e:
+            error_details = traceback.format_exc()
+            print(colored(f"[TRACEBACK]: {error_details}", "red", attrs=["bold"]))
+
+    def send(self, move, pwms):
+        try:
+            pins = pins_data.get(int(move))
+            message = self.format_data(pins, pwms)
+            
+            if move in [9,10,11]:
+                message = "?" + message
+
             self.ws.send(message)
         except Exception as e:
             error_details = traceback.format_exc()
@@ -29,7 +56,7 @@ class esp32Client:
             wst.daemon = True
             wst.start()
             
-            time.sleep(5)
+            time.sleep(3)
         except KeyboardInterrupt:
             self.ws.close()
             print(colored("Bye :)", "yellow", attrs=["bold"]))
